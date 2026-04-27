@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVL System Designer — Mobile Church</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf7f2;--surface:#ffffff;--surface2:#f3ede4;--surface3:#ece5d8;
+  --border:#e8e0d4;--border-hover:#c9bfb0;
+  --text:#1c1917;--text-secondary:#78716c;--text-muted:#a8a29e;
+  --accent:#0d6e5a;--accent-dim:rgba(13,110,90,0.08);--accent-border:rgba(13,110,90,0.35);
+  --amber:#92400e;--amber-dim:rgba(146,64,14,0.08);--amber-border:rgba(146,64,14,0.3);
+  --radius:10px;--radius-sm:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;}
+.app{max-width:760px;margin:0 auto;padding:2rem 1.5rem 6rem;}
+.header{margin-bottom:2.5rem;}
+.header-eyebrow{font-size:11px;font-family:'DM Mono',monospace;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:8px;}
+.header h1{font-size:28px;font-weight:600;letter-spacing:-.02em;}
+.header p{font-size:14px;color:var(--text-secondary);margin-top:6px;}
+.progress-track{display:flex;gap:8px;margin-bottom:2.5rem;}
+.prog-step{flex:1;height:3px;border-radius:2px;background:var(--surface3);transition:background .3s;}
+.prog-step.done{background:var(--accent);}
+.prog-step.active{background:rgba(13,110,90,.4);}
+.prog-label{display:flex;justify-content:space-between;margin-bottom:6px;}
+.prog-label span{font-size:11px;font-family:'DM Mono',monospace;color:var(--text-muted);letter-spacing:.06em;}
+.prog-label span.active-label{color:var(--accent);}
+.step{display:none;}
+.step.active{display:block;}
+.section-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.section-tag{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.section-tag::after{content:'';flex:1;height:1px;background:var(--border);}
+.step-title{font-size:20px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px;}
+.step-desc{font-size:14px;color:var(--text-secondary);margin-bottom:1.5rem;}
+.field-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;gap:12px;}
+.field-row+.field-row{border-top:1px solid var(--border);}
+.field-label{font-size:14px;color:var(--text);flex:1;}
+.field-label small{display:block;font-size:12px;color:var(--text-secondary);margin-top:1px;}
+.counter{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.cbtn{width:32px;height:32px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text-secondary);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.cbtn:hover{border-color:var(--border-hover);color:var(--text);background:var(--surface3);}
+.cval{font-size:16px;font-weight:500;min-width:28px;text-align:center;font-family:'DM Mono',monospace;color:var(--text);}
+.chip-group{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px;margin-top:8px;}
+.chip{padding:10px 12px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text-secondary);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;line-height:1.4;text-align:left;width:100%;}
+.chip:hover{border-color:var(--border-hover);color:var(--text);background:var(--surface3);}
+.chip.on{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent);font-weight:500;}
+.inline-note{font-size:12px;color:var(--text-secondary);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;margin-top:10px;line-height:1.5;}
+.inline-note.accent{border-color:var(--accent-border);color:var(--accent);background:var(--accent-dim);}
+.inline-note.amber{border-color:var(--amber-border);color:var(--amber);background:var(--amber-dim);}
+.reveal{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.reveal.show{display:block;}
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.dim-item label{font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px;}
+.dim-item input,.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:15px;font-family:'DM Mono',monospace;padding:10px 12px;}
+.dim-item input{width:100%;}
+.form-input{width:100%;font-family:'DM Sans',sans-serif;}
+.dim-item input:focus,.form-input:focus{outline:none;border-color:var(--accent-border);}
+.tally-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 1.5rem;margin-bottom:1.25rem;display:flex;gap:1.5rem;flex-wrap:wrap;}
+.tally-item .t-label{font-size:11px;font-family:'DM Mono',monospace;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;}
+.tally-item .t-val{font-size:20px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace;}
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:2rem;}
+.btn-back{padding:9px 18px;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-secondary);font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;}
+.btn-back:hover{border-color:var(--border-hover);color:var(--text);}
+.btn-next{padding:9px 22px;background:var(--accent);border:none;border-radius:var(--radius-sm);color:#ffffff;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;}
+.btn-next:hover{background:#0a5a49;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px;}
+.form-item label{font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px;}
+.results-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:1.25rem;}
+.metric-tile{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;}
+.metric-tile .mt-label{font-size:11px;font-family:'DM Mono',monospace;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.metric-tile .mt-val{font-size:26px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace;letter-spacing:-.02em;}
+.metric-tile .mt-sub{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+.metric-tile.highlight{border-color:var(--accent-border);background:var(--accent-dim);}
+.metric-tile.highlight .mt-val{color:var(--accent);}
+.rec-card{background:var(--surface);border:1px solid var(--accent-border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.rec-eyebrow{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.rec-headline{font-size:15px;color:var(--text-secondary);line-height:1.65;}
+.rec-headline strong{color:var(--text);font-weight:600;}
+.dual-rack{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1rem;}
+.rack-visual{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;}
+.rack-title{font-size:10px;font-family:'DM Mono',monospace;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;}
+.rrow{display:flex;align-items:center;gap:10px;padding:0 10px;border-radius:4px;font-size:11px;border:1px solid transparent;}
+.ru-u{font-family:'DM Mono',monospace;font-size:10px;min-width:22px;color:var(--text-muted);}
+.ru-name{flex:1;font-weight:500;line-height:1.3;}
+.ru-blur{filter:blur(4px);user-select:none;}
+.c-green{background:#ecfdf7;border-color:#6ee7b7;color:#065f46;}
+.c-blue{background:#eff6ff;border-color:#93c5fd;color:#1e40af;}
+.c-purple{background:#f5f3ff;border-color:#c4b5fd;color:#5b21b6;}
+.c-amber{background:#fffbeb;border-color:#fcd34d;color:#78350f;}
+.c-gray{background:var(--surface2);border-color:var(--border);color:var(--text-secondary);}
+.bom-hdr{display:grid;grid-template-columns:1fr 50px;gap:8px;padding:4px 0 8px;font-size:10px;font-family:'DM Mono',monospace;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border);}
+.bom-hdr span:last-child{text-align:right;}
+.bom-cat{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);padding:10px 0 4px;border-bottom:1px solid var(--border);margin-bottom:2px;}
+.bom-row{display:grid;grid-template-columns:1fr 50px;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.bom-row:last-child{border-bottom:none;}
+.bom-row .bn{color:var(--text);}
+.bom-row .bq{text-align:right;font-family:'DM Mono',monospace;font-weight:500;color:var(--text-secondary);}
+.blur-wrap{position:relative;overflow:hidden;border-radius:var(--radius-sm);}
+.blur-inner{filter:blur(5px);pointer-events:none;user-select:none;}
+.lock-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(250,247,242,.88);backdrop-filter:blur(2px);border-radius:var(--radius);border:1px solid var(--border);padding:1.5rem;}
+.lock-overlay p{font-size:13px;color:var(--text-secondary);text-align:center;max-width:340px;line-height:1.6;}
+.btn-stripe{padding:10px 24px;background:var(--accent);border:none;border-radius:var(--radius-sm);color:#ffffff;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;}
+.btn-stripe:hover{background:#0a5a49;}
+.btn-outline{padding:9px 20px;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-secondary);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;}
+.btn-outline:hover{border-color:var(--border-hover);color:var(--text);}
+.quote-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;}
+.q-line{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--border);font-size:14px;}
+.q-line:last-child{border-bottom:none;}
+.q-line .ql{color:var(--text-secondary);}
+.q-line .qv{font-family:'DM Mono',monospace;font-weight:500;color:var(--text);}
+.q-total{display:flex;justify-content:space-between;align-items:center;padding:16px 1.5rem;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:var(--radius);margin-bottom:1rem;}
+.q-total .qtl{font-size:15px;font-weight:600;color:var(--accent);}
+.q-total .qtv{font-size:28px;font-weight:600;font-family:'DM Mono',monospace;color:var(--accent);}
+.field-error .chip-group{outline:2px solid #c2410c;outline-offset:4px;border-radius:var(--radius-sm);}
+.field-error .dim-item input{border-color:#c2410c;background:#fff5f0;}
+.field-error-note{font-size:12px;color:#c2410c;margin-top:6px;display:none;}
+.field-error .field-error-note{display:block;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.shake{animation:shake .35s ease;}
+@media print{
+  .app{display:none!important;}
+  #printView{display:block!important;font-family:'DM Sans',sans-serif;padding:1.5rem;color:#111;background:#fff;}
+  #printView .pe{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#666;margin-bottom:4px;}
+  #printView h1{font-size:22px;font-weight:600;margin-bottom:2rem;}
+  #printView .ps{margin-bottom:1.5rem;page-break-inside:avoid;}
+  #printView .pl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#888;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:10px;}
+  #printView .prec{font-size:14px;color:#333;line-height:1.7;margin-bottom:1rem;}
+  #printView .prec strong{color:#111;font-weight:600;}
+  #printView .pm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem;}
+  #printView .pm{border:1px solid #ddd;border-radius:6px;padding:10px 12px;}
+  #printView .pm .pml{font-size:10px;color:#888;text-transform:uppercase;margin-bottom:2px;}
+  #printView .pm .pmv{font-size:20px;font-weight:600;color:#111;}
+  #printView .pm .pms{font-size:11px;color:#666;}
+  #printView .dual-rack{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  #printView .rack-visual{border:1px solid #ddd;border-radius:8px;padding:1rem;}
+  #printView .rack-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#888;margin-bottom:8px;}
+  #printView .rrow{border-radius:3px;padding:0 8px;font-size:11px;border:1px solid transparent;}
+  #printView .ru-blur{filter:none;}
+  #printView .c-green{background:#e8faf0!important;border-color:#a7e9c0!important;color:#166534!important;}
+  #printView .c-blue{background:#eff6ff!important;border-color:#93c5fd!important;color:#1e40af!important;}
+  #printView .c-purple{background:#f5f3ff!important;border-color:#c4b5fd!important;color:#5b21b6!important;}
+  #printView .c-amber{background:#fffbeb!important;border-color:#fcd34d!important;color:#92400e!important;}
+  #printView .c-gray{background:#f9f9f9!important;border-color:#ddd!important;color:#444!important;}
+  #printView .bom-hdr{display:grid;grid-template-columns:1fr 50px;gap:8px;padding:4px 0 6px;font-size:10px;text-transform:uppercase;color:#888;border-bottom:1px solid #ddd;}
+  #printView .bom-hdr span:last-child{text-align:right;}
+  #printView .bom-cat{font-size:10px;text-transform:uppercase;color:#888;padding:8px 0 4px;border-bottom:1px solid #ddd;}
+  #printView .bom-row{display:grid;grid-template-columns:1fr 50px;gap:8px;padding:6px 0;border-bottom:1px solid #eee;font-size:12px;}
+  #printView .bom-row .bn{color:#111;}
+  #printView .bom-row .bq{text-align:right;color:#555;}
+  #printView .quote-block{border:1px solid #ddd;border-radius:8px;padding:1rem;}
+  #printView .q-line{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;font-size:13px;color:#333;}
+  #printView .q-line .qv{font-weight:600;color:#111;}
+  #printView .pq-total{display:flex;justify-content:space-between;padding:12px 1rem;background:#f0faf4;border:1px solid #a7e9c0;border-radius:8px;margin-top:1rem;}
+  #printView .pq-total .qtl{font-size:14px;font-weight:600;color:#166534;}
+  #printView .pq-total .qtv{font-size:22px;font-weight:700;color:#166534;}
+  #printView .pfooter{font-size:11px;color:#888;border-top:1px solid #ddd;padding-top:10px;margin-top:2rem;}
+/* ── MOBILE RESPONSIVE ─────────────────────────────────── */
+@media (max-width: 600px) {
+  .app { padding: 1.25rem 1rem 5rem; }
+  .header { margin-bottom: 1.75rem; }
+  .header h1 { font-size: 22px; }
+  .prog-label span { font-size: 10px; }
+  .section-card { padding: 1rem 1.1rem; }
+
+  /* Room dimension fields — always single column on mobile */
+  .dim-grid { grid-template-columns: 1fr !important; gap: 8px; }
+  /* Prevent iOS zoom on number input focus */
+  .dim-item input { font-size: 16px; padding: 12px 14px; }
+
+  /* Form grid — stack */
+  .form-grid { grid-template-columns: 1fr; gap: 10px; }
+
+  /* Field rows — keep label and counter on same line, prevent label wrapping */
+  .field-row { flex-wrap: nowrap; align-items: center; }
+  .field-label { font-size: 13px; min-width: 0; }
+  .field-label small { font-size: 11px; }
+  .counter { flex-shrink: 0; }
+
+  .results-grid { grid-template-columns: 1fr; }
+  .dual-rack { grid-template-columns: 1fr; gap: 10px; }
+  .tally-bar { gap: 1rem; padding: 12px 1rem; }
+  .tally-item .t-val { font-size: 18px; }
+  .nav-row { margin-top: 1.5rem; }
+  .btn-back, .btn-next { padding: 9px 14px; font-size: 13px; }
+  .chip-group { gap: 5px; }
+  .chip { font-size: 12px; padding: 9px 10px; }
+  #quoteCTAs > div { grid-template-columns: 1fr !important; }
+  #quoteCTAs button { height: auto !important; }
+  .rec-card { padding: 1rem; }
+  .rec-headline { font-size: 14px; }
+  .metric-tile .mt-val { font-size: 22px; }
+  .bom-hdr, .bom-row { font-size: 12px; }
+  .lock-overlay { padding: 1.25rem 1rem; }
+  .lock-overlay p { font-size: 12px; }
+  .btn-stripe { font-size: 13px; padding: 9px 18px; }
+  .btn-outline { font-size: 12px; padding: 7px 14px; }
+  .inline-note { font-size: 11px; }
+  .step-title { font-size: 17px; }
+  .step-desc { font-size: 13px; }
+  .q-line { font-size: 13px; }
+  .q-total .qtv { font-size: 22px; }
+}
+
+@media (max-width: 420px) {
+  .app { padding: 1rem 0.85rem 5rem; }
+  .header h1 { font-size: 20px; }
+  .chip { font-size: 11px; padding: 8px 8px; }
+  .metric-tile .mt-val { font-size: 20px; }
+  .q-total .qtv { font-size: 20px; }
+  .btn-next, .btn-back { font-size: 12px; padding: 8px 12px; }
+  .cbtn { width: 34px; height: 34px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-eyebrow">Mobile Church AVL</div>
+    <h1>System Designer</h1>
+    <p>Answer a few questions to generate a complete rack build, equipment list, and project quote.</p>
+  </div>
+  <div class="prog-label">
+    <span id="stepLabel" class="active-label">01 — Room</span>
+    <span id="stepCount">Step 1 of 5</span>
+  </div>
+  <div class="progress-track" id="progTrack"></div>
+
+  <!-- STEP 1 -->
+  <div class="step active" id="s1">
+    <div class="step-title">Room overview</div>
+    <div class="step-desc">Tell us about your space so we can size everything correctly.</div>
+    <div class="section-card">
+      <div class="section-tag">Venue type</div>
+      <div id="err-venueType">
+        <div class="chip-group" id="venueType">
+          <button class="chip" data-val="gym">School gym</button>
+          <button class="chip" data-val="cafeteria">Cafeteria</button>
+          <button class="chip" data-val="theater">Theater / auditorium</button>
+          <button class="chip" data-val="warehouse">Warehouse / loft</button>
+          <button class="chip" data-val="outdoor">Outdoor</button>
+          <button class="chip" data-val="other">Other</button>
+        </div>
+        <div class="field-error-note">Please select a venue type.</div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-tag">Room dimensions</div>
+      <div class="dim-grid">
+        <div class="dim-item" id="err-roomLength"><label>Room depth (ft) — front to back</label><input type="number" id="roomLength" placeholder="e.g. 80" min="0"></div>
+        <div class="dim-item" id="err-roomWidth"><label>Room width (ft) — side to side</label><input type="number" id="roomWidth" placeholder="e.g. 50" min="0"></div>
+        <div class="dim-item"><label>Room height (ft) — ceiling</label><input type="number" id="roomHeight" placeholder="e.g. 20" min="0"></div>
+      </div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">Stage dimensions</div>
+        <div class="dim-grid">
+          <div class="dim-item"><label>Stage depth (ft) — front to back</label><input type="number" id="stageDepth" placeholder="e.g. 14" min="0"></div>
+          <div class="dim-item"><label>Stage width (ft) — side to side</label><input type="number" id="stageWidth" placeholder="e.g. 35" min="0"></div>
+        </div>
+      </div>
+      <div id="err-dims" class="field-error-note" style="margin-top:6px;">Please enter room depth and width.</div>
+      <div id="sqftNote" class="inline-note" style="display:none;"></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <div class="field-label" style="margin-bottom:8px;">Is the stage included in those room dimensions?<small>Helps calculate true audience sq footage</small></div>
+        <div class="chip-group" id="stageIncluded">
+          <button class="chip" data-val="yes">Yes — stage is inside those dimensions</button>
+          <button class="chip" data-val="no">No — stage is separate</button>
+        </div>
+        <div id="stageAdjNote" class="inline-note" style="display:none;"></div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-tag">Attendance</div>
+      <div id="err-attendance">
+        <div class="chip-group" id="attendance">
+          <button class="chip" data-val="50">Under 50</button>
+          <button class="chip" data-val="150">50–150</button>
+          <button class="chip" data-val="300">150–300</button>
+          <button class="chip" data-val="500">300–500</button>
+          <button class="chip" data-val="500+">500+</button>
+        </div>
+        <div class="field-error-note">Please select your average attendance.</div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-tag">Console preference</div>
+      <div id="err-consoleMode">
+        <div class="chip-group" id="consoleMode">
+          <button class="chip" data-val="ipad">iPad (rack console)</button>
+          <button class="chip" data-val="console">Physical console</button>
+        </div>
+        <div class="field-error-note">Please select a console preference.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <span style="font-size:12px;color:var(--text-muted);font-family:'DM Mono',monospace;">Step 1 / 5</span>
+      <button class="btn-next" id="next1">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="s2">
+    <div class="step-title">Stage inputs</div>
+    <div class="step-desc">Every item maps to a console channel, cable run, and potentially a DI box.</div>
+    <div class="section-card">
+      <div class="section-tag">Vocals</div>
+      <div class="field-row">
+        <div class="field-label">Handheld wireless mics<small>Include preaching / speaking mics</small></div>
+        <div class="counter"><button class="cbtn" data-adj="wVocal" data-d="-1">−</button><span class="cval" id="wVocal">0</span><button class="cbtn" data-adj="wVocal" data-d="1">+</button></div>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Wired vocal mics<small>Include talkback / music director mics</small></div>
+        <div class="counter"><button class="cbtn" data-adj="wiredVocal" data-d="-1">−</button><span class="cval" id="wiredVocal">0</span><button class="cbtn" data-adj="wiredVocal" data-d="1">+</button></div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-tag">Drums</div>
+      <div class="chip-group" id="drumKit">
+        <button class="chip" data-val="none">No drums</button>
+        <button class="chip" data-val="basic">Basic kit</button>
+        <button class="chip" data-val="standard">Standard kit</button>
+        <button class="chip" data-val="full">Full kit</button>
+        <button class="chip" data-val="own">I have my own mics</button>
+      </div>
+      <div id="drumMicNote" class="inline-note" style="display:none;"></div>
+      <div id="drumOwnReveal" class="reveal">
+        <div class="field-row" style="border:none;padding-top:0;">
+          <div class="field-label">How many drum inputs?<small>Count each mic as one channel</small></div>
+          <div class="counter"><button class="cbtn" data-adj="drumOwn" data-d="-1">−</button><span class="cval" id="drumOwn">4</span><button class="cbtn" data-adj="drumOwn" data-d="1">+</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-tag">Band</div>
+      <div class="field-row">
+        <div class="field-label">Electric guitars<small>DI box + instrument cable included for each</small></div>
+        <div class="counter"><button class="cbtn" data-adj="elec" data-d="-1">−</button><span class="cval" id="elec">0</span><button class="cbtn" data-adj="elec" data-d="1">+</button></div>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Acoustic guitars<small>DI box + instrument cable included for each</small></div>
+        <div class="counter"><button class="cbtn" data-adj="acoustic" data-d="-1">−</button><span class="cval" id="acoustic">0</span><button class="cbtn" data-adj="acoustic" data-d="1">+</button></div>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Bass guitar<small>DI box + instrument cable included</small></div>
+        <div class="counter"><button class="cbtn" data-adj="bass" data-d="-1">−</button><span class="cval" id="bass">0</span><button class="cbtn" data-adj="bass" data-d="1">+</button></div>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Keyboards<small>Stereo — 2-channel DI + instrument cable included for each</small></div>
+        <div class="counter"><button class="cbtn" data-adj="keys" data-d="-1">−</button><span class="cval" id="keys">0</span><button class="cbtn" data-adj="keys" data-d="1">+</button></div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-tag">Tracks &amp; cues</div>
+      <div style="margin-bottom:10px;">
+        <div class="field-label" style="margin-bottom:8px;">Do you only need 2 channels for Click &amp; Track from a device like an iPad?</div>
+        <div class="chip-group" id="iPadTracks">
+          <button class="chip" data-val="yes">Yes, only 2 channels</button>
+          <button class="chip" data-val="no">No</button>
+        </div>
+      </div>
+      <div id="tracksNoReveal" class="reveal">
+        <div class="field-label" style="margin-bottom:8px;">Were you planning on using Click &amp; Track at all?</div>
+        <div class="chip-group" id="tracksAtAll">
+          <button class="chip" data-val="yes">Yes</button>
+          <button class="chip" data-val="no">No — skip it</button>
+        </div>
+        <div id="tracksInterfaceReveal" class="reveal" style="margin-top:12px;">
+          <div class="field-label" style="margin-bottom:6px;">If you're using a USB interface, how many channels do you need?<small style="display:block;font-size:12px;color:var(--text-secondary);margin-top:2px;">Typically 4 or 8 — your call</small></div>
+          <div class="counter"><button class="cbtn" data-adj="ifaceChannels" data-d="-1">−</button><span class="cval" id="ifaceChannels">4</span><button class="cbtn" data-adj="ifaceChannels" data-d="1">+</button></div>
+        </div>
+      </div>
+      <div id="iPadTrackNote" class="inline-note accent" style="display:none;margin-top:10px;">2 channels · Radial Pro2 stereo DI + Hosa CMP-159 3.5mm TRS to dual ¼" breakout cable included</div>
+    </div>
+    <div class="tally-bar">
+      <div class="tally-item"><div class="t-label">Total inputs</div><div class="t-val" id="totalInputsDisplay">0</div></div>
+      <div class="tally-item"><div class="t-label">DI boxes</div><div class="t-val" id="totalDIsDisplay">0</div></div>
+      <div class="tally-item"><div class="t-label">XLR runs</div><div class="t-val" id="totalXLRDisplay">0</div></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" id="back2">← Back</button>
+      <button class="btn-next" id="next2">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" id="s3">
+    <div class="step-title">Monitor outputs</div>
+    <div class="step-desc">Each unique mix = one console bus. Main outputs are auto-calculated.</div>
+    <div class="section-card">
+      <div class="section-tag">In-ear monitors</div>
+      <div class="field-row">
+        <div class="field-label">Wireless IEM packs<small>1 transmitter + 1 belt pack each — every pack is its own feed</small></div>
+        <div class="counter"><button class="cbtn" data-adj="wIEM" data-d="-1">−</button><span class="cval" id="wIEM">0</span><button class="cbtn" data-adj="wIEM" data-d="1">+</button></div>
+      </div>
+      <div class="field-row">
+        <div class="field-label">Wired IEM feeds<small>Behringer P1 — XLR from stagebox to musician, no rack space</small></div>
+        <div class="counter"><button class="cbtn" data-adj="wiredIEM" data-d="-1">−</button><span class="cval" id="wiredIEM">0</span><button class="cbtn" data-adj="wiredIEM" data-d="1">+</button></div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-tag">Stage wedges</div>
+      <div class="field-row">
+        <div class="field-label">How many stage wedges?</div>
+        <div class="counter"><button class="cbtn" data-adj="wedges" data-d="-1">−</button><span class="cval" id="wedges">0</span><button class="cbtn" data-adj="wedges" data-d="1">+</button></div>
+      </div>
+      <div id="wedgeMixReveal" class="reveal">
+        <div class="field-label" style="margin-bottom:8px;">Same signal to all wedges, or different feeds?</div>
+        <div class="chip-group" id="wedgeMixMode">
+          <button class="chip" data-val="same">Same signal to all &nbsp;<span style="font-size:11px;opacity:.6">(1 bus)</span></button>
+          <button class="chip" data-val="different">Different feeds</button>
+        </div>
+        <div id="wedgeDiffReveal" class="reveal" style="margin-top:12px;">
+          <div class="field-label" style="margin-bottom:6px;">How many different outputs?<small id="wedgeBusCapNote" style="color:var(--text-secondary);font-size:12px;"></small></div>
+          <div class="counter"><button class="cbtn" id="wbMinus">−</button><span class="cval" id="wedgeBuses">2</span><button class="cbtn" id="wbPlus">+</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-tag">Main outputs <span style="font-size:10px;font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0">(auto-calculated)</span></div>
+      <div id="mainOutputNote" class="inline-note">Fill in your inputs first and we'll calculate this.</div>
+    </div>
+    <div class="tally-bar">
+      <div class="tally-item"><div class="t-label">Monitor buses</div><div class="t-val" id="monBusDisplay">0</div></div>
+      <div class="tally-item"><div class="t-label">Main outputs</div><div class="t-val" id="mainOutDisplay">0</div></div>
+      <div class="tally-item"><div class="t-label">Total outputs</div><div class="t-val" id="totalOutputsDisplay">0</div></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" id="back3">← Back</button>
+      <button class="btn-next" id="next3">Generate system →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step" id="s4">
+    <div class="step-title">Your system design</div>
+    <div class="step-desc">Here's what we recommend based on your inputs.</div>
+    <div id="resultsContent"></div>
+    <div class="nav-row" style="margin-top:1.5rem;">
+      <button class="btn-back" id="back4">← Edit</button>
+      <button class="btn-next" id="next4">Get a quote →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step" id="s5">
+    <div class="step-title">Project quote</div>
+    <div class="step-desc">We build it, label it, and ship it ready to deploy.</div>
+    <div class="section-card">
+      <div class="section-tag">Your info</div>
+      <div class="form-grid">
+        <div class="form-item"><label>Your name</label><input class="form-input" type="text" id="contactName" placeholder="First Last"></div>
+        <div class="form-item"><label>Church name</label><input class="form-input" type="text" id="churchName" placeholder="Church name"></div>
+        <div class="form-item"><label>Email address</label><input class="form-input" type="email" id="contactEmail" placeholder="you@church.org"></div>
+        <div class="form-item"><label>Shipping ZIP code</label><input class="form-input" type="text" id="destZip" maxlength="5" placeholder="e.g. 90210"></div>
+      </div>
+    </div>
+    <div id="quoteContent"></div>
+    <div id="quoteCTAs" style="display:none;margin-top:1.25rem;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem;">
+        <button class="btn-next" id="btnRequestBuild" style="font-size:13px;padding:12px 16px;line-height:1.4;height:auto;">
+          Request this build<br><span style="font-size:11px;font-weight:400;opacity:.85;">We'll reach out within 24 hrs</span>
+        </button>
+        <button class="btn-next" id="btnBuyPlans" style="background:#78350f;font-size:13px;padding:12px 16px;line-height:1.4;height:auto;">
+          Purchase system plans — $199<br><span style="font-size:11px;font-weight:400;opacity:.85;">Full BOM, rack layout &amp; stage plot</span>
+        </button>
+      </div>
+      <div id="requestConfirm" style="display:none;" class="inline-note accent">
+        Your request has been sent! We'll be in touch within 24 hours to talk through next steps.
+      </div>
+    </div>
+    <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);">
+      <p style="font-size:11px;color:var(--text-muted);line-height:1.7;max-width:600px;">
+        <strong style="color:var(--text-secondary);">Disclaimer:</strong> All pricing, equipment recommendations, and project estimates provided by this tool are for planning purposes only and do not constitute a formal contract or binding quote. Final pricing is subject to change based on equipment availability, current market pricing, freight carrier rates, and site-specific requirements. The Church Production Guy LLC reserves the right to adjust any estimate prior to issuing a formal project agreement. Estimated ship dates and lead times are not guaranteed.
+      </p>
+    </div>
+    <div class="nav-row" style="margin-top:1.5rem;">
+      <button class="btn-back" id="back5">← Back</button>
+    </div>
+  </div>
+</div>
+<div id="printView"></div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────
+const STRIPE_LINK = 'https://buy.stripe.com/test_aFabJ141JdHO79U7Rn5AQ00';
+const CONTACT_EMAIL = 'sekelly1120@gmail.com'; // your email for build requests
+const UNLOCK_PARAM = 'purchased';
+const DOC_FEE = 199;
+const ORIGIN_ZIP = '27591';
+const LABOR_RATE = 80;
+const UNLOCKED = new URLSearchParams(window.location.search).get(UNLOCK_PARAM) === 'true';
+
+// ── STATE ────────────────────────────────────────────────
+const S = {
+  venueType:'', attendance:'', consoleMode:'ipad',
+  roomLength:0, roomWidth:0, roomHeight:0, stageDepth:0, stageWidth:0, stageIncluded:'',
+  wVocal:0, wiredVocal:0, drumKit:'none', drumOwn:4,
+  elec:0, elecDI:[], acoustic:0, bass:0, keys:0,
+  iPadTracks:'', tracksAtAll:'', ifaceChannels:4,
+  wIEM:0, wiredIEM:0, wedges:0, wedgeMixMode:'', wedgeBuses:2
+};
+
+const DRUM_INFO = {
+  none:{inputs:0,desc:''},
+  basic:{inputs:4,desc:'Kick · Snare · Overhead L · Overhead R'},
+  standard:{inputs:7,desc:'Kick · Snare · Tom 1 · Tom 2 · Floor Tom · Overhead L · Overhead R'},
+  full:{inputs:9,desc:'Kick In · Kick Out · Snare Top · Snare Bottom · Tom 1 · Tom 2 · Floor Tom · OH L · OH R'},
+  own:{inputs:0,desc:''}
+};
+
+// ── CHIP GROUPS: wire via addEventListener ───────────────
+function wireChipGroup(groupId, key, afterFn) {
+  const el = document.getElementById(groupId);
+  if (!el) return;
+  el.addEventListener('click', function(e) {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    el.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+    btn.classList.add('on');
+    S[key] = btn.dataset.val;
+    if (afterFn) afterFn(btn.dataset.val);
+    updateSqft();
+    calcAll();
+  });
+}
+
+// ── COUNTER BUTTONS: wire via event delegation ───────────
+document.addEventListener('click', function(e) {
+  // Clear validation errors when user selects a chip
+  const chip = e.target.closest('.chip');
+  if (chip) {
+    const errGroup = chip.closest('[id^="err-"]');
+    if (errGroup) { errGroup.classList.remove('field-error','shake'); }
+  }
+  // Counter buttons
+  const cbtn = e.target.closest('.cbtn');
+  if (cbtn) {
+    const key = cbtn.dataset.adj;
+    const delta = parseInt(cbtn.dataset.d);
+    if (key) {
+      adjKey(key, delta);
+      return;
+    }
+    // Special wedge bus buttons
+    if (cbtn.id === 'wbMinus') { adjWedgeBuses(-1); return; }
+    if (cbtn.id === 'wbPlus')  { adjWedgeBuses(1);  return; }
+  }
+  // Nav buttons
+  const id = e.target.id;
+  if (id === 'next1') { if (validateStep1()) goStep(2); }
+  if (id === 'next2') goStep(3);
+  if (id === 'next3') goStep(4);
+  if (id === 'next4') goStep(5);
+  if (id === 'back2') goStep(1);
+  if (id === 'back3') goStep(2);
+  if (id === 'back4') goStep(3);
+  if (id === 'back5') goStep(4);
+  if (id === 'btnPrint') { buildPrintView(); window.print(); }
+  if (id === 'btnPrint4') { buildPrintView(); window.print(); }
+  if (id === 'btnDownloadSVG' || id === 'btnExportSVG') { downloadStagePlotSVG(); }
+  if (id === 'btnExportPNG') { exportStagePlotPNG(); }
+  if (id === 'btnResetPlot') { initStagePlot(true); }
+  if (id === 'btnBuyPlans') {
+    window.open(STRIPE_LINK + '?success_url=' + encodeURIComponent(window.location.href + '?' + UNLOCK_PARAM + '=true'), '_blank');
+  }
+  if (id === 'btnRequestBuild') {
+    const name = (document.getElementById('contactName').value || '').trim();
+    const church = (document.getElementById('churchName').value || '').trim();
+    const email = (document.getElementById('contactEmail').value || '').trim();
+    const zip = (document.getElementById('destZip').value || '').trim();
+    const res = buildBOM();
+    const inputs = calcInputs(), outputs = calcMonBuses() + calcMainOutputs();
+    const subject = encodeURIComponent('Build Request — ' + (church || name || 'New Church') + ' (' + inputs + ' inputs)');
+    const body = encodeURIComponent(
+      'New build request from the AVL System Designer.\n\n'
+      + 'Name: ' + (name || '—') + '\n'
+      + 'Church: ' + (church || '—') + '\n'
+      + 'Email: ' + (email || '—') + '\n'
+      + 'Ship to ZIP: ' + (zip || '—') + '\n\n'
+      + 'System: ' + res.con.short + '\n'
+      + 'Inputs: ' + inputs + ' | Outputs: ' + outputs + '\n'
+      + 'Venue: ' + (S.venueType || '—') + ' | Attendance: ' + (S.attendance || '—') + '\n\n'
+      + 'Quote page URL: ' + window.location.href
+    );
+    window.location.href = 'mailto:' + CONTACT_EMAIL + '?subject=' + subject + '&body=' + body;
+    document.getElementById('requestConfirm').style.display = 'block';
+  }
+  // Stripe / quote CTA in results
+  if (id === 'btnStripe') {
+    window.open(STRIPE_LINK + '?success_url=' + encodeURIComponent(window.location.href + '?' + UNLOCK_PARAM + '=true'), '_blank');
+  }
+  if (id === 'btnQuoteCTA') goStep(5);
+});
+
+// Input changes for form fields
+document.addEventListener('input', function(e) {
+  const id = e.target.id;
+  if (['roomLength','roomWidth','roomHeight','stageDepth','stageWidth'].includes(id)) updateSqft();
+  if (['contactName','churchName','contactEmail','destZip'].includes(id)) calcQuote();
+  // Clear validation errors on input
+  const item = e.target.closest('[id^="err-"]');
+  if (item) { item.classList.remove('field-error','shake'); }
+  const dn = document.getElementById('err-dims');
+  if (dn && (id === 'roomLength' || id === 'roomWidth')) {
+    dn.style.display = 'none';
+    const rL = document.getElementById('err-roomLength'), rW = document.getElementById('err-roomWidth');
+    if (rL) rL.classList.remove('field-error','shake');
+    if (rW) rW.classList.remove('field-error','shake');
+  }
+});
+
+// ── Wire all chip groups ──────────────────────────────────
+wireChipGroup('venueType', 'venueType');
+wireChipGroup('stageIncluded', 'stageIncluded');
+wireChipGroup('attendance', 'attendance');
+wireChipGroup('consoleMode', 'consoleMode');
+wireChipGroup('iPadTracks', 'iPadTracks', function(val) {
+  document.getElementById('tracksNoReveal').classList.toggle('show', val === 'no');
+  document.getElementById('iPadTrackNote').style.display = val === 'yes' ? 'block' : 'none';
+});
+wireChipGroup('tracksAtAll', 'tracksAtAll', function(val) {
+  document.getElementById('tracksInterfaceReveal').classList.toggle('show', val === 'yes');
+});
+wireChipGroup('wedgeMixMode', 'wedgeMixMode', function(val) {
+  document.getElementById('wedgeDiffReveal').classList.toggle('show', val === 'different');
+});
+wireChipGroup('drumKit', 'drumKit', function(val) {
+  const note = document.getElementById('drumMicNote');
+  const own = document.getElementById('drumOwnReveal');
+  if (val === 'own') { note.style.display = 'none'; own.classList.add('show'); }
+  else { own.classList.remove('show'); note.style.display = val !== 'none' ? 'block' : 'none'; if (val !== 'none') note.textContent = DRUM_INFO[val].desc; }
+});
+
+// ── COUNTER LOGIC ─────────────────────────────────────────
+function adjKey(key, delta) {
+  const min = (key === 'drumOwn' || key === 'ifaceChannels') ? 1 : 0;
+  S[key] = Math.max(min, (S[key] || 0) + delta);
+  const el = document.getElementById(key); if (el) el.textContent = S[key];
+  if (key === 'elec') {} // no per-guitar DI reveal needed anymore
+  if (key === 'wedges') {
+    document.getElementById('wedgeMixReveal').classList.toggle('show', S.wedges >= 2);
+    if (S.wedges < 2) { S.wedgeMixMode = ''; S.wedgeBuses = 2; }
+    if (S.wedgeBuses > S.wedges) { S.wedgeBuses = Math.max(2, S.wedges); document.getElementById('wedgeBuses').textContent = S.wedgeBuses; }
+  }
+  calcAll();
+}
+function adjWedgeBuses(d) {
+  S.wedgeBuses = Math.min(S.wedges, Math.max(2, S.wedgeBuses + d));
+  document.getElementById('wedgeBuses').textContent = S.wedgeBuses;
+  const n = document.getElementById('wedgeBusCapNote'); if (n) n.textContent = 'Max ' + S.wedges + ' (one per wedge)';
+  calcAll();
+}
+
+// ── ELECTRIC GUITAR DI ROWS ───────────────────────────────
+function renderElecDI() {
+  const c = document.getElementById('elecDIReveal');
+  if (!S.elecDI) S.elecDI = [];
+  while (S.elecDI.length < S.elec) S.elecDI.push('xlr');
+  S.elecDI = S.elecDI.slice(0, S.elec);
+  if (!S.elec) { c.innerHTML = ''; return; }
+  let h = '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">';
+  for (let i = 0; i < S.elec; i++) {
+    h += '<div style="display:flex;align-items:center;gap:10px;padding:5px 0;font-size:13px;' + (i > 0 ? 'border-top:1px solid var(--border);' : '') + '">'
+      + '<span style="flex:1;color:var(--text-secondary);">Guitar ' + (i+1) + ' — pedalboard XLR out?</span>'
+      + '<div class="chip-group" style="margin-top:0;" data-elec-idx="' + i + '">'
+      + '<button class="chip' + (S.elecDI[i] === 'xlr' ? ' on' : '') + '" data-val="xlr">Yes, XLR out</button>'
+      + '<button class="chip' + (S.elecDI[i] === 'di' ? ' on' : '') + '" data-val="di">No, needs DI</button>'
+      + '</div></div>';
+  }
+  c.innerHTML = h + '</div>';
+  // Wire the dynamically created groups
+  c.querySelectorAll('[data-elec-idx]').forEach(function(grp) {
+    grp.addEventListener('click', function(e) {
+      const btn = e.target.closest('.chip'); if (!btn) return;
+      const idx = parseInt(grp.dataset.elecIdx);
+      grp.querySelectorAll('.chip').forEach(function(b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      S.elecDI[idx] = btn.dataset.val;
+      calcAll();
+    });
+  });
+}
+
+// ── VALIDATION ────────────────────────────────────────────
+function clearErrors() {
+  document.querySelectorAll('.field-error').forEach(function(el) { el.classList.remove('field-error'); });
+}
+function markError(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.add('field-error');
+    el.classList.remove('shake');
+    void el.offsetWidth; // reflow to restart animation
+    el.classList.add('shake');
+  }
+}
+function validateStep1() {
+  clearErrors();
+  let ok = true;
+  if (!S.venueType)    { markError('err-venueType');   ok = false; }
+  if (!S.attendance)   { markError('err-attendance');  ok = false; }
+  if (!S.consoleMode)  { markError('err-consoleMode'); ok = false; }
+  const hasLength = parseFloat(document.getElementById('roomLength').value) > 0;
+  const hasWidth  = parseFloat(document.getElementById('roomWidth').value)  > 0;
+  if (!hasLength || !hasWidth) {
+    if (!hasLength) markError('err-roomLength');
+    if (!hasWidth)  markError('err-roomWidth');
+    // also show the dims note
+    const dn = document.getElementById('err-dims');
+    if (dn) { dn.style.display = 'block'; dn.parentElement.classList.add('field-error'); }
+    ok = false;
+  }
+  // Scroll to first error
+  if (!ok) {
+    const first = document.querySelector('#s1 .field-error');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  return ok;
+}
+
+function updateSqft() {
+  S.roomLength = parseFloat(document.getElementById('roomLength').value) || 0;
+  S.roomWidth  = parseFloat(document.getElementById('roomWidth').value)  || 0;
+  S.roomHeight = parseFloat(document.getElementById('roomHeight').value) || 0;
+  S.stageDepth = parseFloat(document.getElementById('stageDepth').value) || 0;
+  S.stageWidth = parseFloat(document.getElementById('stageWidth').value) || 0;
+  const total = S.roomLength * S.roomWidth;
+  const stageSqft = S.stageIncluded === 'yes' ? S.stageDepth * (S.stageWidth || S.roomWidth) : 0;
+  const audience = total - stageSqft;
+  const note = document.getElementById('sqftNote'), adj2 = document.getElementById('stageAdjNote');
+  if (total > 0) {
+    note.textContent = Math.round(total).toLocaleString() + ' sq ft total' + (total > 5000 ? ' — large room, delay fills likely needed' : ' — standard coverage');
+    note.style.display = 'block'; note.className = 'inline-note' + (total > 5000 ? ' amber' : '');
+  } else note.style.display = 'none';
+  if (adj2) {
+    if (S.stageIncluded === 'yes' && stageSqft > 0) {
+      adj2.textContent = 'Audience area ≈ ' + Math.round(audience).toLocaleString() + ' sq ft after subtracting stage';
+      adj2.style.display = 'block'; adj2.className = 'inline-note accent';
+    } else adj2.style.display = 'none';
+  }
+  calcAll();
+}
+
+// ── CALCULATIONS ──────────────────────────────────────────
+function getDrumInputs() { return S.drumKit === 'own' ? S.drumOwn : (DRUM_INFO[S.drumKit] ? DRUM_INFO[S.drumKit].inputs : 0); }
+function getTracksChannels() { if (S.iPadTracks === 'yes') return 2; if (S.tracksAtAll === 'yes') return S.ifaceChannels; return 0; }
+function calcInputs() { return S.wVocal + S.wiredVocal + getDrumInputs() + S.elec + S.acoustic + S.bass + S.keys * 2 + getTracksChannels(); }
+function calcDIs() {
+  // Guitars (elec/acoustic/bass): 1 single-ch DI each (Radial ProDI)
+  // Keys: 1 stereo DI each (Radial Pro2 — 2 channels, 1 box)
+  // iPad/2-ch tracks: 1 stereo DI (Radial Pro2)
+  // USB interface tracks: 2 single-ch DIs
+  const singleDI = S.elec + S.acoustic + S.bass;
+  const stereoDI = S.keys + (S.iPadTracks === 'yes' ? 1 : 0);
+  const ifaceDI = (S.tracksAtAll === 'yes') ? 2 : 0;
+  return { single: singleDI, stereo: stereoDI, iface: ifaceDI, total: singleDI + stereoDI * 2 + ifaceDI };
+}
+function calcMonBuses() {
+  let b = S.wIEM + S.wiredIEM;
+  if (S.wedges > 0) { if (S.wedgeMixMode === 'same') b += 1; else if (S.wedgeMixMode === 'different') b += S.wedgeBuses; else b += 1; }
+  return b;
+}
+function calcMainOutputs() {
+  const needsSub = getDrumInputs() > 0 || S.bass > 0;
+  const needsFills = S.roomLength * S.roomWidth > 5000;
+  const outs = needsSub ? ['Main L','Main R','Sub L','Sub R'] : ['Main L','Main R'];
+  const note = document.getElementById('mainOutputNote');
+  if (note) { let msg = outs.join(' · '); if (needsFills) msg += ' · Delay fills (from Main L/R)'; note.textContent = msg; note.className = 'inline-note accent'; }
+  return outs.length;
+}
+function calcAll() {
+  const inputs = calcInputs(), dis = calcDIs(), xlr = inputs, mon = calcMonBuses(), main = calcMainOutputs();
+  function set(id, v) { const e = document.getElementById(id); if (e) e.textContent = v; }
+  set('totalInputsDisplay', inputs); set('totalDIsDisplay', dis.total); set('totalXLRDisplay', xlr);
+  set('monBusDisplay', mon); set('mainOutDisplay', main); set('totalOutputsDisplay', mon + main);
+}
+
+// ── CONSOLE REC ───────────────────────────────────────────
+function getConsoleRec(inputs) {
+  if (S.consoleMode !== 'console') {
+    return { name:'Behringer WingRack', sku:'BEHR-WINGRACK', ru:4, price:1999, short:'Behringer WingRack',
+      stagebox:{ name:'Behringer S32 (32in/16out over AES50)', sku:'BEHR-S32', ru:3, price:799 } };
+  }
+  if (inputs <= 32) {
+    return { name:'Allen & Heath QU-5D (with Dante)', sku:'AH-QU5D', ru:0, price:2499, short:'Allen & Heath QU-5D',
+      stagebox:{ name:'A&H AR2412 (24in/12out Dante)', sku:'AH-AR2412', ru:2, price:1099 } };
+  }
+  return { name:'Allen & Heath SQ-5', sku:'AH-SQ5', ru:0, price:2999, short:'Allen & Heath SQ-5',
+    stagebox:{ name:'A&H AR2412 (24in/12out Dante)', sku:'AH-AR2412', ru:2, price:1099 } };
+}
+
+// ── SPEAKER REC ───────────────────────────────────────────
+function getSpeakerRec() {
+  const sqft = S.roomLength * S.roomWidth;
+  const needsSub = getDrumInputs() > 0 || S.bass > 0;
+  const needsFills = sqft > 5000;
+  let mains, mainsPrice, mainsQty = 2, sub = null, subPrice = 0, subQty = 0, fills = null, fillsPrice = 0, fillsQty = 0;
+  if (sqft > 0 && sqft <= 2500) { mains = 'QSC K10.2'; mainsPrice = 899; }
+  else if (sqft <= 5000) { mains = 'QSC K12.2'; mainsPrice = 1099; }
+  else { mains = 'QSC KW153'; mainsPrice = 1799; }
+  if (!sqft) { mains = 'QSC K12.2'; mainsPrice = 1099; }
+  if (needsSub) { sub = 'QSC KW181'; subPrice = 1699; subQty = 2; }
+  if (needsFills) { fills = 'QSC K8.2'; fillsPrice = 699; fillsQty = 2; }
+  return { mains, mainsPrice, mainsQty, sub, subPrice, subQty, fills, fillsPrice, fillsQty, needsFills };
+}
+
+// ── CAT6 REEL ─────────────────────────────────────────────
+function getCat6Len() {
+  const p = 2 * (S.roomLength + S.roomWidth);
+  if (!p) return 100;
+  return Math.ceil(p * 1.2 / 50) * 50;
+}
+
+// ── BOM BUILDER ───────────────────────────────────────────
+function buildBOM() {
+  const inputs = calcInputs(), outputs = calcMonBuses() + calcMainOutputs();
+  const con = getConsoleRec(inputs), spk = getSpeakerRec();
+  const isPhys = S.consoleMode === 'console';
+  const hasWireless = S.wVocal > 0 || S.wIEM > 0;
+  const needsFills = S.roomLength * S.roomWidth > 5000;
+
+  let rA = [], rB = [], ruA = 0, ruB = 0;
+  function pA(cat,name,sku,qty,ruEach,unit,color){const rt=ruEach*qty;rA.push({cat,name,sku,qty,ruEach,ruTotal:rt,unit,color});ruA+=rt;}
+  function pB(cat,name,sku,qty,ruEach,unit,color){const rt=ruEach*qty;rB.push({cat,name,sku,qty,ruEach,ruTotal:rt,unit,color});ruB+=rt;}
+  function aA(cat,name,sku,qty,unit,color){rA.push({cat,name,sku,qty,ruEach:0,ruTotal:0,unit,color});}
+  function aB(cat,name,sku,qty,unit,color){rB.push({cat,name,sku,qty,ruEach:0,ruTotal:0,unit,color});}
+  const mT = isPhys ? 'B' : 'A';
+  function aM(cat,name,sku,qty,unit,color){if(mT==='B')aB(cat,name,sku,qty,unit,color);else aA(cat,name,sku,qty,unit,color);}
+  function pM(cat,name,sku,qty,ruEach,unit,color){if(mT==='B')pB(cat,name,sku,qty,ruEach,unit,color);else pA(cat,name,sku,qty,ruEach,unit,color);}
+
+  // Audio infrastructure — console ALWAYS in rA first so it's top of BOM
+  const c6 = getCat6Len();
+  if (isPhys) {
+    aA('Audio infrastructure',con.name,con.sku,1,con.price,'c-green'); // BOM listing in rA
+    pB('Audio infrastructure',con.stagebox.name,con.stagebox.sku,1,con.stagebox.ru,con.stagebox.price,'c-green'); // rack visual in rB
+    aA('Audio infrastructure',con.stagebox.name,con.stagebox.sku+'-bom',1,con.stagebox.price,'c-green'); // BOM listing in rA
+  } else {
+    if(con.ru>0) pA('Audio infrastructure',con.name,con.sku,1,con.ru,con.price,'c-green');
+    pA('Audio infrastructure',con.stagebox.name,con.stagebox.sku,1,con.stagebox.ru,con.stagebox.price,'c-green');
+  }
+  aA('Audio infrastructure','Cat6 Shielded Cable Reel '+c6+'ft (room perimeter run)','CAT6-REEL',1,c6<=100?49:c6<=250?89:129,'c-gray');
+  // Speakers added to audio infrastructure so they appear in visible BOM preview
+  aA('Audio infrastructure',spk.mains+' Powered Main Speaker','SPK-MAIN',spk.mainsQty,spk.mainsPrice,'c-amber');
+  aA('Audio infrastructure','Speaker Pole Stand','SPK-POLE',spk.mainsQty,79,'c-gray');
+  if (spk.sub) aA('Audio infrastructure',spk.sub+' Powered Subwoofer','SPK-SUB',spk.subQty,spk.subPrice,'c-amber');
+  if (spk.fills && needsFills) aA('Audio infrastructure',spk.fills+' Powered Delay Fill','SPK-FILL',spk.fillsQty,spk.fillsPrice,'c-amber');
+
+  // Mics
+  if (S.wVocal > 0) {
+    const pairs = Math.ceil(S.wVocal / 2);
+    aM('Mics','Shure QLXD2/SM58 Handheld Transmitter','SHR-QLXD2',S.wVocal,399,'c-blue');
+    pM('Mics','Shure QLXD4 Dual Receiver','SHR-QLXD4',pairs,1,699,'c-blue');
+    if (S.wVocal >= 4) { pM('Mics','Shure UA845SWB Antenna Distribution','SHR-UA845',1,1,649,'c-blue'); aM('Mics','Shure UA874 Active Directional Antenna','SHR-UA874',2,219,'c-blue'); }
+  }
+  if (S.wiredVocal > 0) aA('Mics','Shure SM58 Wired Vocal Mic','SHR-SM58',S.wiredVocal,99,'c-gray');
+  const dk = S.drumKit;
+  if (dk==='basic') aA('Mics','Shure PGA Drum Kit 4','SHR-PGA4',1,199,'c-gray');
+  if (dk==='standard') aA('Mics','Shure PGA Drum Kit 7','SHR-PGA7',1,329,'c-gray');
+  if (dk==='full') { aA('Mics','Shure PGA Drum Kit 7','SHR-PGA7',1,329,'c-gray'); aA('Mics','Shure SM91A Kick Boundary','SHR-SM91A',1,199,'c-gray'); aA('Mics','Shure SM57 (snare/extras)','SHR-SM57',2,99,'c-gray'); }
+
+  // IEM & wedges
+  if (S.wIEM > 0) {
+    const iRU = Math.ceil(S.wIEM / 2);
+    aM('IEM & wedges','Shure PSM300 Transmitter (½U, '+S.wIEM+'× → '+iRU+'U)','SHR-PSM300TX',S.wIEM,699,'c-purple');
+    aM('IEM & wedges','Shure PSM300 Belt Pack Receiver','SHR-PSM300BPK',S.wIEM,399,'c-purple');
+    aM('IEM & wedges','Shure SE215 Earphones','SHR-SE215',S.wIEM,99,'c-purple');
+    pM('IEM & wedges','Shure RP-HM Dual Rack Mount (2× PSM300)','SHR-RPHM',iRU,1,49,'c-purple');
+    if (S.wIEM >= 2) pM('IEM & wedges','Shure PA421A Antenna Combiner','SHR-PA421A',1,1,449,'c-purple');
+  }
+  if (S.wiredIEM > 0) { aA('IEM & wedges','Behringer Powerplay P1 Personal Mixer','BEHR-P1',S.wiredIEM,89,'c-purple'); aA('IEM & wedges','XLR Cable 25ft (P1 to stagebox)','XLR-25',S.wiredIEM,18,'c-gray'); }
+  if (S.wedges > 0) aA('IEM & wedges','Yamaha DXR12mkII Powered Wedge','YAM-DXR12',S.wedges,799,'c-amber');
+
+  // Band supplies — DI boxes by type
+  const dis = calcDIs();
+  // Single-channel DI: guitars and bass → Radial ProDI
+  if (dis.single > 0) aA('Band supplies','Radial ProDI Passive Direct Box (1-ch)','RAD-PRODI',dis.single,129,'c-gray');
+  // Stereo DI: keys + iPad/2-ch tracks → Radial Pro2 (2-ch, 2 XLR outs per box)
+  if (dis.stereo > 0) aA('Band supplies','Radial Pro2 Stereo Direct Box (2-ch)','RAD-PRO2',dis.stereo,189,'c-gray');
+  // USB interface tracks: 2 standard ProDI
+  if (dis.iface > 0) aA('Band supplies','Radial ProDI Passive Direct Box (interface feed)','RAD-PRODI-IF',dis.iface,129,'c-gray');
+  // Hosa breakout cable for iPad/2-ch tracks
+  if (S.iPadTracks === 'yes') aA('Band supplies','Hosa CMP-159 3.5mm TRS to Dual ¼" TS Breakout Cable','HOSA-CMP159',1,9,'c-gray');
+  // Instrument cables: 1 per guitar/bass, 1 per keyboard
+  const inst = S.elec + S.acoustic + S.bass + S.keys;
+  if (inst > 0) aA('Band supplies','GLS Audio Instrument Cable 10ft','GLS-INST',inst,14,'c-gray');
+  pA('Band supplies','Tripp Lite IBAR12 Rackmount Power Strip (band/stage)','TRIPP-IBAR12',1,2,89,'c-gray');
+  aA('Band supplies','Extension Cord 25ft (band power)','EXT-BAND',3,19,'c-gray');
+
+  // Power & rack
+  pA('Power & rack','Tripp Lite SMART1500LCDT 2U Rackmount UPS','TRIPP-UPS-A',1,2,449,'c-gray');
+  if (isPhys) {
+    pB('Power & rack','Tripp Lite SMART1500LCDT 2U Rackmount UPS','TRIPP-UPS-B',1,2,449,'c-gray');
+    pB('Power & rack','Furman M-8X2 Power Conditioner (FOH)','FUR-FOH',1,1,89,'c-gray');
+    pA('Power & rack','Furman M-8X2 Power Conditioner (stage)','FUR-STG',1,1,89,'c-gray');
+  } else {
+    pA('Power & rack','Furman M-8X2 Power Conditioner','FUR-M8X2',1,1,89,'c-gray');
+  }
+  aA('Power & rack','Extension Cord 50ft (FOH rack)','EXT-FOH',1,29,'c-gray');
+
+  // Networking
+  const eeroQty = S.roomLength * S.roomWidth > 4000 ? 3 : 2;
+  aA('Networking','Netgear GS308 8-Port Gigabit Switch','NET-GS308',1,39,'c-gray');
+  aA('Networking','Eero 6 Dual-Band Mesh Router (outlet mount)','EERO-6',eeroQty,99,'c-gray');
+  aA('Networking','Cat6 Patch Cable 3ft','CAT6-3FT',4,8,'c-gray');
+
+  // Drawers
+  if (hasWireless) {
+    if (isPhys) { pB('Power & rack','Gator GRW-DRWR2 2U Drawer (FOH accessories)','GAT-DRWR-B',1,2,49,'c-gray'); pA('Power & rack','Gator GRW-DRWR2 2U Drawer (DI/cables)','GAT-DRWR-A',1,2,49,'c-gray'); }
+    else pA('Power & rack','Gator GRW-DRWR2 2U Drawer (batteries/cables)','GAT-DRWR',1,2,49,'c-gray');
+  }
+
+  // Cables
+  const xlr = calcInputs(); if (xlr > 0) aA('Cables','Mogami Gold XLR 10ft','MOG-XLR',xlr,29,'c-gray');
+
+  // Rack cases
+  const rABuf = ruA + 2;
+  let cRU_A, cName_A, cPrice_A;
+  if (rABuf<=8){cRU_A=8;cName_A='SKB R804 8U Rolling Rack';cPrice_A=399;}
+  else if(rABuf<=12){cRU_A=12;cName_A='SKB R1202 12U Rolling Rack';cPrice_A=549;}
+  else if(rABuf<=16){cRU_A=16;cName_A='SKB R1606 16U Rolling Rack';cPrice_A=699;}
+  else{cRU_A=20;cName_A='SKB R2006 20U Rolling Rack';cPrice_A=849;}
+  rA.push({cat:'Rack case',name:cName_A+(isPhys?' (stage rack)':''),sku:'SKB-A',qty:1,ruEach:0,ruTotal:0,unit:cPrice_A,color:'c-amber'});
+
+  let cRU_B=0,cName_B='',cPrice_B=0;
+  if (isPhys) {
+    const rBBuf = ruB + 3;
+    if(rBBuf<=12){cRU_B=12;cName_B='SKB 12U Slant-Rack FOH Case';cPrice_B=649;}
+    else if(rBBuf<=16){cRU_B=16;cName_B='SKB 16U Slant-Rack FOH Case';cPrice_B=799;}
+    else{cRU_B=20;cName_B='SKB 20U Slant-Rack FOH Case';cPrice_B=949;}
+    rB.push({cat:'Rack case',name:cName_B+' (console in slant top, doghouse for cables)',sku:'SKB-B',qty:1,ruEach:0,ruTotal:0,unit:cPrice_B,color:'c-amber'});
+  }
+
+  const allBOM = rA.concat(rB);
+  const bomTotal = allBOM.reduce(function(s,i){return s+i.qty*i.unit;},0);
+  return { rA, rB, ruA, ruB, cRU_A, cRU_B, con, spk, bomTotal, inputs, outputs, isPhys, needsFills };
+}
+
+// ── RACK VISUAL ───────────────────────────────────────────
+function rackHTML(items, ruUsed, caseRU, title, blurNames) {
+  const SH = 24, GAP = 2;
+  let slots = [];
+  items.filter(function(b){return b.ruTotal>0;}).forEach(function(item){
+    if (item.ruEach > 1) { for(let q=0;q<item.qty;q++) slots.push({label:item.qty>1?item.name+' #'+(q+1):item.name,span:item.ruEach,color:item.color}); }
+    else { for(let q=0;q<item.qty;q++) slots.push({label:item.qty>1?item.name+' #'+(q+1):item.name,span:1,color:item.color}); }
+  });
+  const used = slots.reduce(function(s,sl){return s+sl.span;},0);
+  if (caseRU - used > 0) slots.push({label:'— open —', span:caseRU-used, color:'empty'});
+  let h = '<div class="rack-visual"><div class="rack-title">'+title+' — '+ruUsed+'U / '+caseRU+'U</div><div style="display:flex;flex-direction:column;gap:'+GAP+'px;">';
+  slots.forEach(function(sl){
+    const ht = sl.span*SH + (sl.span-1)*GAP, isEmpty = sl.color==='empty';
+    const nc = blurNames && !isEmpty ? 'ru-name ru-blur' : 'ru-name';
+    h += '<div class="rrow '+(isEmpty?'c-gray':sl.color)+'" style="height:'+ht+'px;'+(isEmpty?'opacity:.25;':'')+'">'
+      + '<span class="ru-u" style="align-self:'+(sl.span>1?'flex-start':'center')+';padding-top:'+(sl.span>1?'4px':'0')+'">'+(sl.span>1?sl.span+'U':'1U')+'</span>'
+      + '<span class="'+nc+'" style="align-self:center;">'+sl.label+'</span>'
+      + '</div>';
+  });
+  return h + '</div></div>';
+}
+
+// ── BOM ROWS ──────────────────────────────────────────────
+function bomRowsArray(items) {
+  const rows = []; let lastCat = '';
+  items.forEach(function(item){
+    if (item.cat !== lastCat) { lastCat = item.cat; rows.push('<div class="bom-cat">'+item.cat+'</div>'); }
+    rows.push('<div class="bom-row"><span class="bn">'+item.name+'</span><span class="bq">×'+item.qty+'</span></div>');
+  });
+  return rows;
+}
+function bomRows(items) { return '<div class="bom-hdr"><span>Item</span><span>Qty</span></div>' + bomRowsArray(items).join(''); }
+
+// ── RENDER STEP 4 ─────────────────────────────────────────
+function renderResults() {
+  const res = buildBOM();
+  const { rA, rB, ruA, ruB, cRU_A, cRU_B, con, spk, bomTotal, inputs, outputs, isPhys, needsFills } = res;
+  const mainOuts = calcMainOutputs(), monBuses = calcMonBuses();
+  const spkDesc = spk.sub ? spk.mains+' mains with '+spk.sub+' subs' : spk.mains+' mains';
+  const recText = "This is exciting stuff — we're pumped to be part of your journey. Based on your setup, we'd recommend the <strong>" + con.short + "</strong> — it handles your " + inputs + " inputs and " + outputs + " outputs with room to grow. Pair that with a <strong>" + spkDesc + "</strong> system" + (needsFills ? " and delay fills" : "") + " and your room is going to sound incredible.";
+
+  let html = '<div class="rec-card"><div class="rec-eyebrow">Our recommendation</div><div class="rec-headline">'+recText+'</div></div>';
+
+  html += '<div class="results-grid">'
+    + '<div class="metric-tile"><div class="mt-label">Total inputs</div><div class="mt-val">'+inputs+'</div><div class="mt-sub">console channels</div></div>'
+    + '<div class="metric-tile"><div class="mt-label">Total outputs</div><div class="mt-val">'+outputs+'</div><div class="mt-sub">'+monBuses+' monitor + '+mainOuts+' main</div></div>'
+    + '</div>';
+
+  if (isPhys) html += '<div class="dual-rack">'+rackHTML(rA,ruA,cRU_A,'Stage rack',!UNLOCKED)+rackHTML(rB,ruB,cRU_B,'FOH rack',!UNLOCKED)+'</div>';
+  else html += rackHTML(rA,ruA,cRU_A,'Rack layout',!UNLOCKED);
+
+  const allBOM = rA.concat(rB);
+  const allRows = bomRowsArray(allBOM);
+  // Show all Audio infrastructure rows unblurred (includes console whether in rA or rB)
+  let infraRowCount = 0;
+  let inInfra = false;
+  allRows.forEach(function(r) {
+    if (r.indexOf('bom-cat') >= 0 && r.indexOf('Audio infrastructure') >= 0) { inInfra = true; infraRowCount++; return; }
+    if (r.indexOf('bom-cat') >= 0 && inInfra) { inInfra = false; }
+    if (inInfra) infraRowCount++;
+  });
+  const vis = allRows.slice(0, infraRowCount).join('');
+  const hid = allRows.slice(infraRowCount).join('');
+
+  if (UNLOCKED) {
+    html += '<div class="section-card"><div class="section-tag">Equipment list</div>'+bomRows(allBOM)+'</div>';
+    html += '<div class="section-card"><div class="section-tag">Stage plot <span style="font-size:10px;font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0">— drag people to reposition · double-click to rename</span></div>'
+      + '<div id="stagePlotEditor"></div>'
+      + '<div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">'
+      + '<button class="btn-next" id="btnExportPNG" style="font-size:13px;padding:8px 16px;">Export PNG</button>'
+      + '<button class="btn-outline" id="btnExportSVG" style="font-size:13px;">Export SVG (Illustrator)</button>'
+      + '<button class="btn-outline" id="btnResetPlot" style="font-size:13px;">Reset positions</button>'
+      + '</div></div>';
+    html += '<div style="margin-top:1.25rem;display:flex;justify-content:flex-end;">'
+      + '<button class="btn-next" id="btnPrint4" style="font-size:13px;">Save / Print PDF</button>'
+      + '</div>';
+  } else {
+    html += '<div class="section-card"><div class="section-tag">Equipment list</div>'
+      + '<div class="bom-hdr"><span>Item</span><span>Qty</span></div>' + vis
+      + '<div class="blur-wrap"><div class="blur-inner">'+hid+'</div>'
+      + '<div class="lock-overlay">'
+      + '<p>You can purchase this full system product list, rack layout elevation, and stage plot diagram — or continue to the quote page if you\'d like us to build and ship it for you.</p>'
+      + '<button class="btn-stripe" id="btnStripe">Purchase full design — $'+DOC_FEE+'</button>'
+      + '<button class="btn-outline" id="btnQuoteCTA">Get a build quote instead →</button>'
+      + '<span style="font-size:11px;color:var(--text-muted);">Secure payment via Stripe</span>'
+      + '</div></div></div>';
+  }
+
+  document.getElementById('resultsContent').innerHTML = html;
+  if (UNLOCKED) setTimeout(function(){ initStagePlot(false); }, 50);
+}
+
+// ── STAGE PLOT CANVAS EDITOR ──────────────────────────────
+var SP = { canvas:null, ctx:null, people:[], dragging:null, dragOX:0, dragOY:0, W:680, H:500 };
+
+function spGetDimensions() {
+  // Responsive canvas — fit to container width
+  var container = document.getElementById('stagePlotEditor');
+  var maxW = container ? Math.min(680, container.clientWidth || 680) : 680;
+  var scale = maxW / 680;
+  SP.W = Math.round(maxW);
+  SP.H = Math.round(500 * scale);
+}
+
+var SP_COLORS = {
+  bg:'#faf7f2', stageFill:'#ffffff', stageBorder:'#c9bfb0',
+  personFill:'#f3ede4', personBorder:'#c9bfb0', personBody:'#78716c',
+  ct:'#0d6e5a', iem:'#5b21b6', rack:'#ecfdf7', rackBorder:'#6ee7b7',
+  rackText:'#065f46', fohFill:'#ecfdf7', fohBorder:'#6ee7b7', fohText:'#065f46',
+  spk:'#fffbeb', spkBorder:'#fcd34d', spkText:'#78350f',
+  wedge:'#fef3c7', wedgeBorder:'#d97706', wedgeText:'#92400e',
+  label:'#1c1917', muted:'#a8a29e', legendText:'#78716c'
+};
+
+function spGetStageDims() {
+  var sW = S.stageWidth || 35, sD = S.stageDepth || 14;
+  var aspect = sW / sD;
+  var stageW = Math.max(200, Math.min(520, Math.round(Math.min(500, SP.W * 0.75))));
+  var stageH = Math.max(100, Math.min(200, Math.round(stageW / aspect)));
+  stageW = Math.max(200, Math.min(520, Math.round(stageH * aspect)));
+  var stageX = (SP.W - stageW) / 2, stageY = 90;
+  return {stageX:stageX, stageY:stageY, stageW:stageW, stageH:stageH};
+}
+
+function spDefaultPeople() {
+  var d = spGetStageDims();
+  var stageX=d.stageX, stageY=d.stageY, stageW=d.stageW, stageH=d.stageH;
+  var people = [];
+  if (getDrumInputs()>0) people.push({id:'drummer',role:'Drummer',x:stageX+stageW-70,y:stageY+50,hasClick:S.keys===0,hasIEM:S.wIEM>0});
+  if (S.bass>0) people.push({id:'bass',role:'Bass',x:stageX+stageW-150,y:stageY+50,hasClick:false,hasIEM:S.wIEM>0});
+  for (var ei=0;ei<S.elec;ei++) people.push({id:'elec'+ei,role:S.elec>1?'Electric '+(ei+1):'Electric',x:stageX+stageW-230-ei*80,y:stageY+50,hasClick:false,hasIEM:S.wIEM>0});
+  for (var ki=0;ki<S.keys;ki++) people.push({id:'keys'+ki,role:S.keys>1?'Keys '+(ki+1):'Keys',x:stageX+90+ki*85,y:stageY+Math.round(stageH*0.35),hasClick:ki===0,hasIEM:S.wIEM>0});
+  for (var ai=0;ai<S.acoustic;ai++) people.push({id:'acoustic'+ai,role:S.acoustic>1?'Acoustic '+(ai+1):'Acoustic',x:stageX+200+ai*85,y:stageY+Math.round(stageH*0.35),hasClick:false,hasIEM:S.wIEM>0});
+  var totalV = S.wVocal+S.wiredVocal;
+  for (var vi=0;vi<Math.min(totalV,6);vi++) {
+    var vx = totalV>1 ? stageX+stageW/2-((totalV-1)*55)/2+vi*55 : stageX+stageW/2;
+    people.push({id:'vocal'+vi,role:vi===0?'Lead Vocal':'BGV '+(vi),x:vx,y:stageY+Math.round(stageH*0.72),hasClick:false,hasIEM:S.wIEM>0});
+  }
+  if (people.length===0) people.push({id:'p0',role:'Person',x:stageX+stageW/2,y:stageY+stageH/2,hasClick:false,hasIEM:false});
+  return people;
+}
+
+function initStagePlot(reset) {
+  var container = document.getElementById('stagePlotEditor');
+  if (!container) return;
+  if (!SP.canvas || reset) {
+    spGetDimensions();
+    SP.people = spDefaultPeople();
+    container.innerHTML = '<canvas id="spCanvas" style="border-radius:8px;cursor:grab;max-width:100%;"></canvas>';
+    SP.canvas = document.getElementById('spCanvas');
+    SP.canvas.width = SP.W; SP.canvas.height = SP.H;
+    SP.ctx = SP.canvas.getContext('2d');
+    // Mouse events
+    SP.canvas.addEventListener('mousedown', spMouseDown);
+    SP.canvas.addEventListener('mousemove', spMouseMove);
+    SP.canvas.addEventListener('mouseup', spMouseUp);
+    SP.canvas.addEventListener('dblclick', spDblClick);
+    // Touch events
+    SP.canvas.addEventListener('touchstart', spTouchStart, {passive:false});
+    SP.canvas.addEventListener('touchmove', spTouchMove, {passive:false});
+    SP.canvas.addEventListener('touchend', spTouchEnd);
+  }
+  spDraw();
+}
+
+function spCanvasPos(e) {
+  var rect = SP.canvas.getBoundingClientRect();
+  var scaleX = SP.canvas.width / rect.width;
+  var scaleY = SP.canvas.height / rect.height;
+  return { x:(e.clientX-rect.left)*scaleX, y:(e.clientY-rect.top)*scaleY };
+}
+function spTouchPos(e) {
+  var t = e.touches[0]; return spCanvasPos(t);
+}
+function spHitPerson(x,y) {
+  for (var i=SP.people.length-1;i>=0;i--) {
+    var p=SP.people[i];
+    if (Math.sqrt((x-p.x)*(x-p.x)+(y-p.y)*(y-p.y))<22) return i;
+  }
+  return -1;
+}
+function spMouseDown(e) { var pos=spCanvasPos(e),idx=spHitPerson(pos.x,pos.y); if(idx>=0){SP.dragging=idx;SP.dragOX=pos.x-SP.people[idx].x;SP.dragOY=pos.y-SP.people[idx].y;SP.canvas.style.cursor='grabbing';} }
+function spMouseMove(e) { if(SP.dragging===null)return; var pos=spCanvasPos(e); SP.people[SP.dragging].x=pos.x-SP.dragOX; SP.people[SP.dragging].y=pos.y-SP.dragOY; spDraw(); }
+function spMouseUp() { SP.dragging=null; SP.canvas.style.cursor='grab'; }
+function spTouchStart(e) { e.preventDefault(); var pos=spTouchPos(e),idx=spHitPerson(pos.x,pos.y); if(idx>=0){SP.dragging=idx;SP.dragOX=pos.x-SP.people[idx].x;SP.dragOY=pos.y-SP.people[idx].y;} }
+function spTouchMove(e) { e.preventDefault(); if(SP.dragging===null)return; var pos=spTouchPos(e); SP.people[SP.dragging].x=pos.x-SP.dragOX; SP.people[SP.dragging].y=pos.y-SP.dragOY; spDraw(); }
+function spTouchEnd() { SP.dragging=null; }
+function spDblClick(e) {
+  var pos=spCanvasPos(e),idx=spHitPerson(pos.x,pos.y);
+  if(idx<0)return;
+  var name=prompt('Rename this person:',SP.people[idx].role);
+  if(name!==null&&name.trim()!=='') { SP.people[idx].role=name.trim(); spDraw(); }
+}
+
+function spDraw() {
+  var d = spGetStageDims();
+  var stageX=d.stageX, stageY=d.stageY, stageW=d.stageW, stageH=d.stageH;
+  c.clearRect(0,0,W,H);
+
+  // Background
+  c.fillStyle=SP_COLORS.bg; c.fillRect(0,0,W,H);
+
+  // Title
+  c.fillStyle='#1c1917'; c.font='600 15px DM Sans,Arial,sans-serif'; c.textAlign='center';
+  c.fillText('Stage Plot',W/2,28);
+  c.fillStyle='#78716c'; c.font='12px DM Sans,Arial,sans-serif';
+  var sub='';
+  if(S.stageWidth>0&&S.stageDepth>0) sub=S.stageWidth+'ft wide x '+S.stageDepth+'ft deep stage';
+  else if(S.roomWidth>0&&S.roomLength>0) sub=S.roomWidth+'ft x '+S.roomLength+'ft room';
+  if(S.venueType)sub+=(sub?' — ':'')+S.venueType;
+  if(sub)c.fillText(sub,W/2,46);
+
+  // Legend
+  var legItems=[];
+  if(SP.people.some(function(p){return p.hasClick;}))legItems.push({color:SP_COLORS.ct,label:'CT = Click and Track'});
+  if(S.wIEM>0)legItems.push({color:SP_COLORS.iem,label:'IEM = Wireless in-ear'});
+  if(S.wedges>0)legItems.push({color:SP_COLORS.wedgeBorder,label:'WDG = Stage wedge'});
+  var legX=stageX, legY=68;
+  legItems.forEach(function(li,i){
+    var lx=legX+i*185;
+    c.beginPath(); c.arc(lx+6,legY,5,0,Math.PI*2); c.fillStyle=li.color; c.fill();
+    c.fillStyle=SP_COLORS.legendText; c.font='11px DM Sans,Arial,sans-serif'; c.textAlign='left';
+    c.fillText(li.label,lx+15,legY+4);
+  });
+
+  // Stage box
+  c.beginPath(); c.roundRect(stageX,stageY,stageW,stageH,8);
+  c.fillStyle=SP_COLORS.stageFill; c.fill();
+  c.strokeStyle=SP_COLORS.stageBorder; c.lineWidth=1.5; c.stroke();
+
+  // Stage rack — top left corner of stage
+  spBox(c,stageX+8,stageY+8,56,40,SP_COLORS.rack,SP_COLORS.rackBorder,SP_COLORS.rackText,'STAGE\nRACK',8);
+
+  // Wedges along bottom of stage
+  if(S.wedges>0){
+    var wCount=Math.min(S.wedges,4);
+    for(var wi=0;wi<wCount;wi++){
+      var wx=stageX+(stageW/(wCount+1))*(wi+1)-14, wy=stageY+stageH-20;
+      c.beginPath(); c.roundRect(wx,wy,28,14,2);
+      c.fillStyle=SP_COLORS.wedge; c.fill();
+      c.strokeStyle=SP_COLORS.wedgeBorder; c.lineWidth=1; c.stroke();
+      c.fillStyle=SP_COLORS.wedgeText; c.font='bold 7px Arial,sans-serif'; c.textAlign='center';
+      c.fillText('WDG',wx+14,wy+10);
+    }
+  }
+
+  // Speakers — outside bottom corners of stage
+  var spkY=stageY+stageH+18;
+  spBox(c,stageX,spkY,42,32,SP_COLORS.spk,SP_COLORS.spkBorder,SP_COLORS.spkText,'SPK\nL',8);
+  spBox(c,stageX+stageW-42,spkY,42,32,SP_COLORS.spk,SP_COLORS.spkBorder,SP_COLORS.spkText,'SPK\nR',8);
+  // Subs
+  if(S.bass>0||getDrumInputs()>0){
+    spBox(c,stageX,spkY+38,42,32,SP_COLORS.spk,SP_COLORS.spkBorder,SP_COLORS.spkText,'SUB\nL',8);
+    spBox(c,stageX+stageW-42,spkY+38,42,32,SP_COLORS.spk,SP_COLORS.spkBorder,SP_COLORS.spkText,'SUB\nR',8);
+  }
+
+  // FOH rack — centered below stage
+  var fohW=70,fohH=50,fohX=W/2-fohW/2,fohY=spkY+(S.bass>0||getDrumInputs()>0?80:40);
+  spBox(c,fohX,fohY,fohW,fohH,SP_COLORS.fohFill,SP_COLORS.fohBorder,SP_COLORS.fohText,'FOH\nRACK',8);
+  c.fillStyle=SP_COLORS.fohBorder; c.font='9px DM Sans,Arial,sans-serif'; c.textAlign='center';
+  var fohLabel=S.consoleMode==='console'?'Console':'WingRack';
+  c.fillText(fohLabel,W/2,fohY+fohH-6);
+
+  // Audience label
+  c.fillStyle=SP_COLORS.muted; c.font='11px DM Sans,Arial,sans-serif'; c.textAlign='center';
+  c.fillText('AUDIENCE',W/2,H-10);
+
+  // People
+  SP.people.forEach(function(p){ spDrawPerson(c,p); });
+}
+
+function spBox(c,x,y,w,h,fill,stroke,textColor,label,radius) {
+  c.beginPath(); c.roundRect(x,y,w,h,radius||4);
+  c.fillStyle=fill; c.fill(); c.strokeStyle=stroke; c.lineWidth=1; c.stroke();
+  var lines=label.split('\n');
+  var lineH=12, startY=y+h/2-(lines.length-1)*lineH/2;
+  lines.forEach(function(ln,li){
+    c.fillStyle=textColor; c.font='bold 9px Arial,sans-serif'; c.textAlign='center';
+    c.fillText(ln,x+w/2,startY+li*lineH);
+  });
+}
+
+function spDrawPerson(c,p) {
+  var R=20;
+  // Outer circle
+  c.beginPath(); c.arc(p.x,p.y,R,0,Math.PI*2);
+  c.fillStyle=SP_COLORS.personFill; c.fill();
+  c.strokeStyle=SP_COLORS.personBorder; c.lineWidth=1.5; c.stroke();
+  // Head
+  c.beginPath(); c.arc(p.x,p.y-6,6,0,Math.PI*2);
+  c.fillStyle=SP_COLORS.personBody; c.fill();
+  // Body curve
+  c.beginPath(); c.moveTo(p.x-9,p.y+15); c.quadraticCurveTo(p.x,p.y+5,p.x+9,p.y+15);
+  c.fillStyle=SP_COLORS.personBody; c.fill();
+  // CT badge
+  if(p.hasClick){
+    c.beginPath(); c.arc(p.x+16,p.y-16,8,0,Math.PI*2);
+    c.fillStyle=SP_COLORS.ct; c.fill();
+    c.fillStyle='#fff'; c.font='bold 7px Arial,sans-serif'; c.textAlign='center';
+    c.fillText('CT',p.x+16,p.y-13);
+  }
+  // IEM badge
+  if(p.hasIEM){
+    c.beginPath(); c.arc(p.x-16,p.y-16,7,0,Math.PI*2);
+    c.fillStyle=SP_COLORS.iem; c.fill();
+    c.fillStyle='#fff'; c.font='bold 6px Arial,sans-serif'; c.textAlign='center';
+    c.fillText('IEM',p.x-16,p.y-13);
+  }
+  // Label
+  var lines=p.role.split(' ');
+  lines.forEach(function(ln,li){
+    c.fillStyle=SP_COLORS.label; c.font='10px DM Sans,Arial,sans-serif'; c.textAlign='center';
+    c.fillText(ln,p.x,p.y+R+12+(li*12));
+  });
+}
+
+function exportStagePlotPNG() {
+  if(!SP.canvas)return;
+  var a=document.createElement('a');
+  a.download='stage-plot.png'; a.href=SP.canvas.toDataURL('image/png');
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// Keep SVG export for Illustrator users — rebuilds from canvas state
+function buildStagePlotSVG() {
+  // Build SVG from current canvas state
+  var W=SP.W, H=SP.H;
+  var stageX=60,stageY=95,stageW=520,stageH=210;
+  var isPhys=S.consoleMode==='console';
+  function xe(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function t(x,y,size,fill,weight,content,anchor){anchor=anchor||'middle';return '<text x="'+Math.round(x)+'" y="'+Math.round(y)+'" text-anchor="'+anchor+'" font-size="'+size+'" fill="'+fill+'"'+(weight?' font-weight="'+weight+'"':'')+'>'+xe(content)+'</text>';}
+  function rect(x,y,w,h,rx,fill,stroke,sw){return '<rect x="'+Math.round(x)+'" y="'+Math.round(y)+'" width="'+Math.round(w)+'" height="'+Math.round(h)+'" rx="'+rx+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'"/>';}
+  function circ(cx,cy,r,fill){return '<circle cx="'+Math.round(cx)+'" cy="'+Math.round(cy)+'" r="'+r+'" fill="'+fill+'"/>';}
+
+  var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">';
+  s+=rect(0,0,W,H,0,SP_COLORS.bg,'none',0);
+  s+=t(W/2,28,15,'#1c1917',600,'Stage Plot');
+  var sub=''; if(S.roomLength>0)sub=S.roomLength+'ft x '+S.roomWidth+'ft'; if(S.venueType)sub+=(sub?' - ':'')+S.venueType;
+  if(sub)s+=t(W/2,44,12,'#78716c',null,sub);
+  // Legend
+  var legX=stageX,legY=68;
+  var legItems=[];
+  if((SP.people||[]).some(function(p){return p.hasClick;}))legItems.push({color:SP_COLORS.ct,label:'CT = Click and Track'});
+  if(S.wIEM>0)legItems.push({color:SP_COLORS.iem,label:'IEM = Wireless in-ear'});
+  if(S.wedges>0)legItems.push({color:SP_COLORS.wedgeBorder,label:'WDG = Stage wedge'});
+  legItems.forEach(function(li,i){var lx=legX+i*185;s+=circ(lx+6,legY,5,li.color);s+=t(lx+16,legY+4,11,SP_COLORS.legendText,null,li.label,'start');});
+  // Stage
+  s+=rect(stageX,stageY,stageW,stageH,8,SP_COLORS.stageFill,SP_COLORS.stageBorder,1.5);
+  // Stage rack
+  s+=rect(stageX+8,stageY+8,56,40,4,SP_COLORS.rack,SP_COLORS.rackBorder,1);
+  s+=t(stageX+36,stageY+24,8,SP_COLORS.rackText,700,'STAGE');s+=t(stageX+36,stageY+35,8,SP_COLORS.rackText,null,'RACK');
+  // Wedges
+  if(S.wedges>0){var wc=Math.min(S.wedges,4);for(var wi=0;wi<wc;wi++){var wx=stageX+(stageW/(wc+1))*(wi+1)-14,wy=stageY+stageH-20;s+=rect(wx,wy,28,14,2,SP_COLORS.wedge,SP_COLORS.wedgeBorder,1);s+=t(wx+14,wy+10,7,SP_COLORS.wedgeText,700,'WDG');}}
+  // Speakers
+  var spkY=stageY+stageH+18;
+  s+=rect(stageX,spkY,42,32,4,SP_COLORS.spk,SP_COLORS.spkBorder,1);s+=t(stageX+21,spkY+13,8,SP_COLORS.spkText,700,'SPK');s+=t(stageX+21,spkY+24,8,SP_COLORS.spkText,null,'L');
+  s+=rect(stageX+stageW-42,spkY,42,32,4,SP_COLORS.spk,SP_COLORS.spkBorder,1);s+=t(stageX+stageW-21,spkY+13,8,SP_COLORS.spkText,700,'SPK');s+=t(stageX+stageW-21,spkY+24,8,SP_COLORS.spkText,null,'R');
+  if(S.bass>0||getDrumInputs()>0){s+=rect(stageX,spkY+38,42,32,4,SP_COLORS.spk,SP_COLORS.spkBorder,1);s+=t(stageX+21,spkY+51,8,SP_COLORS.spkText,700,'SUB');s+=t(stageX+21,spkY+62,8,SP_COLORS.spkText,null,'L');s+=rect(stageX+stageW-42,spkY+38,42,32,4,SP_COLORS.spk,SP_COLORS.spkBorder,1);s+=t(stageX+stageW-21,spkY+51,8,SP_COLORS.spkText,700,'SUB');s+=t(stageX+stageW-21,spkY+62,8,SP_COLORS.spkText,null,'R');}
+  // FOH rack
+  var fohW=70,fohH=50,fohX=W/2-fohW/2,fohY=spkY+(S.bass>0||getDrumInputs()>0?80:40);
+  s+=rect(fohX,fohY,fohW,fohH,4,SP_COLORS.fohFill,SP_COLORS.fohBorder,1);
+  s+=t(W/2,fohY+16,8,SP_COLORS.fohText,700,'FOH');s+=t(W/2,fohY+27,8,SP_COLORS.fohText,null,'RACK');s+=t(W/2,fohY+fohH-6,9,SP_COLORS.fohBorder,null,isPhys?'Console':'WingRack');
+  // Audience
+  s+=t(W/2,H-10,11,SP_COLORS.muted,null,'AUDIENCE');
+  // People from current positions
+  var PR=20;
+  (SP.people||spDefaultPeople()).forEach(function(p){
+    s+=circ(p.x,p.y,PR,SP_COLORS.personFill);
+    s+='<circle cx="'+Math.round(p.x)+'" cy="'+Math.round(p.y-6)+'" r="6" fill="'+SP_COLORS.personBody+'"/>';
+    s+='<path d="M'+Math.round(p.x-9)+','+Math.round(p.y+15)+' Q'+Math.round(p.x)+','+Math.round(p.y+5)+' '+Math.round(p.x+9)+','+Math.round(p.y+15)+'" fill="'+SP_COLORS.personBody+'"/>';
+    if(p.hasClick){s+=circ(p.x+16,p.y-16,8,SP_COLORS.ct);s+=t(p.x+16,p.y-12,7,'#fff',700,'CT');}
+    if(p.hasIEM){s+=circ(p.x-16,p.y-16,7,SP_COLORS.iem);s+=t(p.x-16,p.y-13,6,'#fff',null,'IEM');}
+    p.role.split(' ').forEach(function(ln,li){s+=t(p.x,p.y+PR+12+li*12,10,SP_COLORS.label,null,ln);});
+  });
+  s+='</svg>'; return s;
+}
+
+function downloadStagePlotSVG() {
+  var svgString='<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n'+buildStagePlotSVG();
+  var blob=new Blob([svgString],{type:'image/svg+xml'});
+  var url=window.URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.style.display='none'; a.href=url; a.download='stage-plot.svg';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){document.body.removeChild(a);window.URL.revokeObjectURL(url);},1000);
+}
+
+// ── QUOTE CALC ────────────────────────────────────────────
+function svgRect(x,y,w,h,rx,fill,stroke,sw) { return '<rect x="'+r(x)+'" y="'+r(y)+'" width="'+r(w)+'" height="'+r(h)+'" rx="'+rx+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'"/>'; }
+function svgText(x,y,anchor,size,fill,weight,content) { return '<text x="'+r(x)+'" y="'+r(y)+'" text-anchor="'+anchor+'" font-size="'+size+'" fill="'+fill+'"'+(weight?' font-weight="'+weight+'"':'')+'>'+content+'</text>'; }
+function svgCircle(cx,cy,rad,fill,stroke,sw) { return '<circle cx="'+r(cx)+'" cy="'+r(cy)+'" r="'+rad+'" fill="'+fill+'"'+(stroke?' stroke="'+stroke+'" stroke-width="'+sw+'"':'')+'/>';}
+function xmlEsc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function buildStagePlotSVG() {
+  var W=700, H=540, stageW=520, stageH=190, stageX=90, stageY=70;
+  var isPhys = S.consoleMode === 'console';
+
+  var people = [];
+  if (getDrumInputs() > 0) people.push({role:'Drummer', x:0.15, y:0.38, hasClick:S.keys===0});
+  for (var ki=0;ki<S.keys;ki++) people.push({role:S.keys>1?'Keys '+(ki+1):'Keys', x:0.32+ki*0.13, y:0.3, hasClick:ki===0});
+  if (S.bass > 0) people.push({role:'Bass', x:0.55, y:0.38, hasClick:false});
+  for (var ei=0;ei<S.elec;ei++) people.push({role:S.elec>1?'Electric '+(ei+1):'Electric', x:0.7+ei*0.12, y:0.38, hasClick:false});
+  for (var ai=0;ai<S.acoustic;ai++) people.push({role:S.acoustic>1?'Acoustic '+(ai+1):'Acoustic', x:0.74+ai*0.12, y:0.6, hasClick:false});
+  var totalVocals = S.wVocal + S.wiredVocal;
+  for (var vi=0;vi<Math.min(totalVocals,6);vi++) {
+    var sp = totalVocals>1 ? (vi/(totalVocals-1))*0.6+0.2 : 0.5;
+    people.push({role:vi===0?'Lead Vocal':'BGV '+(vi), x:sp, y:0.76, hasClick:false});
+  }
+
+  function px(p) { return stageX + p.x * stageW; }
+  function py(p) { return stageY + p.y * stageH; }
+
+  var s = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'">';
+  s += svgRect(0,0,W,H,0,'#faf7f2','none',0);
+
+  // Title
+  s += svgText(W/2,24,'middle',14,'#1c1917',600,'Stage Plot');
+  var titleSub = '';
+  if (S.roomLength>0) titleSub += S.roomLength+'ft x '+S.roomWidth+'ft';
+  if (S.venueType) titleSub += (titleSub?' - ':'')+xmlEsc(S.venueType);
+  if (titleSub) s += svgText(W/2,40,'middle',11,'#78716c',null,titleSub);
+
+  // Stage box
+  s += svgRect(stageX,stageY,stageW,stageH,8,'#ffffff','#c9bfb0',1.5);
+  s += svgText(stageX+8,stageY+13,'start',8,'#a8a29e',null,'STAGE');
+
+  // Stage rack — back left corner
+  var rX=stageX+10, rY=stageY+stageH-46;
+  s += svgRect(rX,rY,50,36,3,'#ecfdf7','#6ee7b7',1);
+  s += svgText(rX+25,rY+13,'middle',8,'#065f46',600,'STAGE');
+  s += svgText(rX+25,rY+24,'middle',8,'#065f46',null,'RACK');
+
+  // Wedges along front of stage
+  if (S.wedges>0) {
+    var wCount=Math.min(S.wedges,4);
+    for (var wi=0;wi<wCount;wi++) {
+      var wx=stageX+(stageW/(wCount+1))*(wi+1)-14, wy=stageY+stageH-16;
+      s += svgRect(wx,wy,28,13,2,'#fef3c7','#d97706',1);
+      s += svgText(wx+14,wy+9,'middle',7,'#92400e',null,'WDG');
+    }
+  }
+
+  // Speakers front of stage
+  var spkY=stageY+stageH+16;
+  s += svgRect(stageX,spkY,36,28,3,'#fffbeb','#fcd34d',1);
+  s += svgText(stageX+18,spkY+11,'middle',8,'#78350f',600,'SPK');
+  s += svgText(stageX+18,spkY+21,'middle',8,'#78350f',null,'L');
+  s += svgRect(stageX+stageW-36,spkY,36,28,3,'#fffbeb','#fcd34d',1);
+  s += svgText(stageX+stageW-18,spkY+11,'middle',8,'#78350f',600,'SPK');
+  s += svgText(stageX+stageW-18,spkY+21,'middle',8,'#78350f',null,'R');
+  if (S.bass>0||getDrumInputs()>0) {
+    s += svgRect(W/2-26,spkY,52,28,3,'#fffbeb','#fcd34d',1);
+    s += svgText(W/2,spkY+11,'middle',8,'#78350f',600,'SUB');
+    s += svgText(W/2,spkY+21,'middle',8,'#78350f',null,'L+R');
+  }
+
+  // FOH rack — outside stage right
+  var fohX=stageX+stageW+18, fohY=stageY+stageH+10;
+  var fohFill=isPhys?'#eff6ff':'#ecfdf7', fohStroke=isPhys?'#93c5fd':'#6ee7b7', fohTextC=isPhys?'#1e40af':'#065f46';
+  var fohLabel=isPhys?(S.consoleMode==='console'?'Console':'WingRack'):'WingRack';
+  s += svgRect(fohX,fohY,60,44,3,fohFill,fohStroke,1);
+  s += svgText(fohX+30,fohY+14,'middle',8,fohTextC,600,'FOH');
+  s += svgText(fohX+30,fohY+25,'middle',8,fohTextC,null,'RACK');
+  s += svgText(fohX+30,fohY+36,'middle',7,fohStroke,null,xmlEsc(fohLabel));
+
+  // Audience label
+  s += svgText(W/2,H-12,'middle',11,'#a8a29e',null,'AUDIENCE');
+
+  // People
+  var PR=18;
+  people.forEach(function(p) {
+    var ppx=px(p), ppy=py(p);
+    s += svgCircle(ppx,ppy,PR,'#f3ede4','#c9bfb0',1.5);
+    s += svgCircle(ppx,ppy-6,5,'#78716c',null,0);
+    s += '<path d="M'+r(ppx-8)+','+r(ppy+13)+' Q'+r(ppx)+','+r(ppy+5)+' '+r(ppx+8)+','+r(ppy+13)+'" fill="#78716c"/>';
+    if (p.hasClick) {
+      s += svgCircle(ppx+15,ppy-15,7,'#0d6e5a',null,0);
+      s += svgText(ppx+15,ppy-12,'middle',7,'#ffffff',600,'CT');
+    }
+    if (S.wIEM>0) {
+      s += svgCircle(ppx-15,ppy-15,6,'#5b21b6',null,0);
+      s += svgText(ppx-15,ppy-12,'middle',6,'#ffffff',null,'IEM');
+    }
+    var lines=p.role.split(' ');
+    lines.forEach(function(ln,li){
+      s += svgText(ppx,ppy+PR+11+(li*11),'middle',9,'#1c1917',null,xmlEsc(ln));
+    });
+  });
+
+  // Legend
+  var legX=stageX, legY=stageY+stageH+62;
+  var legItems=[];
+  if (people.some(function(p){return p.hasClick;})) legItems.push({color:'#0d6e5a',label:'CT = Click and Track'});
+  if (S.wIEM>0) legItems.push({color:'#5b21b6',label:'IEM = Wireless in-ear'});
+  if (S.wedges>0) legItems.push({color:'#d97706',label:'WDG = Stage wedge'});
+  legItems.forEach(function(li,i) {
+    var lx=legX+i*170;
+    s += svgCircle(lx+6,legY+6,5,li.color,null,0);
+    s += svgText(lx+15,legY+10,'start',9,'#78716c',null,xmlEsc(li.label));
+  });
+
+  s += '</svg>';
+  return s;
+}
+
+function buildStagePlotHTML() {
+  return '<div style="overflow-x:auto;">' + buildStagePlotSVG() + '</div>';
+}
+
+function downloadStagePlotSVG() {
+  var svgString = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + buildStagePlotSVG();
+  var blob = new Blob([svgString], {type:'image/svg+xml'});
+  var url = window.URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  a.download = 'stage-plot.svg';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function() { document.body.removeChild(a); window.URL.revokeObjectURL(url); }, 1000);
+}
+  const W = 700, H = 520;
+  const stageW = 560, stageH = 200;
+  const stageX = (W - stageW) / 2, stageY = 60;
+  const isPhys = S.consoleMode === 'console';
+
+  // People on stage
+  const people = [];
+  // Drummer (back center-left area)
+  if (getDrumInputs() > 0) people.push({role:'Drummer', x:0.18, y:0.35, hasClick: S.keys === 0});
+  // Keys (back center)
+  if (S.keys > 0) {
+    for (let i=0;i<S.keys;i++) people.push({role:'Keys '+(S.keys>1?i+1:''), x:0.35+i*0.12, y:0.3, hasClick:i===0});
+  }
+  // Bass (back right)
+  if (S.bass > 0) people.push({role:'Bass', x:0.55, y:0.35, hasClick:false});
+  // Electric guitars
+  for (let i=0;i<S.elec;i++) people.push({role:'Electric '+(S.elec>1?i+1:''), x:0.68+i*0.1, y:0.35, hasClick:false});
+  // Acoustic guitars
+  for (let i=0;i<S.acoustic;i++) people.push({role:'Acoustic '+(S.acoustic>1?i+1:''), x:0.72+i*0.1, y:0.55, hasClick:false});
+  // Vocalists front
+  const totalVocals = S.wVocal + S.wiredVocal;
+  for (let i=0;i<Math.min(totalVocals,6);i++) {
+    const spread = totalVocals > 1 ? (i/(totalVocals-1)) * 0.6 + 0.2 : 0.5;
+    people.push({role: i===0 ? 'Lead Vocal' : 'BGV '+(i), x: spread, y:0.72, hasClick:false});
+  }
+
+  function personX(p) { return stageX + p.x * stageW; }
+  function personY(p) { return stageY + p.y * stageH; }
+
+// ── QUOTE CALC ────────────────────────────────────────────
+function calcQuote() {
+  const dZip = (document.getElementById('destZip').value || '').trim();
+  const name = (document.getElementById('contactName').value || '').trim();
+  const church = (document.getElementById('churchName').value || '').trim();
+  if (dZip.length !== 5) { document.getElementById('quoteContent').innerHTML = '<div class="inline-note" style="margin-top:0;">Enter your 5-digit ZIP code to see an estimate.</div>'; return; }
+  const res = buildBOM();
+  const { bomTotal, spk, isPhys } = res;
+  const oDig = 279, dDig = parseInt(dZip.substring(0,3)), diff = Math.abs(oDig - dDig);
+  let zone, palletRate;
+  if (diff<50){zone=1;palletRate=350;}else if(diff<150){zone=2;palletRate=500;}else if(diff<300){zone=3;palletRate=650;}else{zone=4;palletRate=850;}
+  const spkVol = spk.mainsQty*3 + (spk.subQty||0)*5 + (spk.fillsQty||0)*2 + 1;
+  const pallets = Math.max(1, Math.ceil(spkVol/48));
+  const shippingCost = pallets*palletRate + (isPhys ? palletRate : 0);
+  const inp = calcInputs();
+  let baseHrs, cableFee;
+  if(inp<=12){baseHrs=6;cableFee=150;}else if(inp<=24){baseHrs=9;cableFee=250;}else{baseHrs=12;cableFee=350;}
+  const laborCost = (baseHrs+2)*LABOR_RATE + cableFee;
+  const eqMargin = Math.round(bomTotal*1.20);
+  const total = eqMargin + laborCost + shippingCost;
+  const greeting = name ? '<p style="font-size:14px;color:var(--text-secondary);margin-bottom:1rem;">Hi '+name+(church?' from '+church:'')+'! Here\'s your estimated project investment.</p>' : '';
+
+  const bullets = [
+    'Equipment procurement &amp; testing',
+    'Rack build &amp; assembly',
+    'Cable labeling, sorting &amp; organization',
+    'Console programming, scene setup &amp; routing',
+    'System testing before shipment',
+    'Freight shipping to ' + dZip + ' (Zone ' + zone + ')',
+  ];
+
+  let q = greeting
+    + '<div class="quote-block">'
+    + '<div class="section-tag">What\'s included</div>'
+    + '<ul style="margin:0 0 1rem 1.1rem;padding:0;display:flex;flex-direction:column;gap:5px;">'
+    + bullets.map(function(b){ return '<li style="font-size:14px;color:var(--text-secondary);line-height:1.5;">'+b+'</li>'; }).join('')
+    + '</ul>'
+    + '<div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;border-top:1px solid var(--border);">'
+    + '<span style="font-size:13px;color:var(--text-secondary);">Total project investment</span>'
+    + '<span style="font-size:22px;font-weight:600;font-family:\'DM Mono\',monospace;color:var(--text);">$'+total.toLocaleString()+'<span style="font-size:14px;color:var(--text-muted);">*</span></span>'
+    + '</div>'
+    + '<p style="font-size:11px;color:var(--text-muted);margin-top:8px;line-height:1.6;">* Price may vary based on final equipment availability, freight carrier rates at time of shipment, and any site-specific requirements identified during installation planning. This estimate is based on current street pricing and standard zone-based freight rates.</p>'
+    + '</div>';
+
+  document.getElementById('quoteContent').innerHTML = q;
+  document.getElementById('quoteCTAs').style.display = 'block';
+}
+
+// ── PRINT VIEW ────────────────────────────────────────────
+function buildPrintView() {
+  const res = buildBOM();
+  const { rA, rB, ruA, ruB, cRU_A, cRU_B, con, spk, bomTotal, inputs, outputs, isPhys, needsFills } = res;
+  const mainOuts = calcMainOutputs(), monBuses = calcMonBuses();
+  const spkDesc = spk.sub ? spk.mains+' mains with '+spk.sub+' subs' : spk.mains+' mains';
+  const dZip = (document.getElementById('destZip').value||'').trim();
+  const name = (document.getElementById('contactName').value||'').trim();
+  const church = (document.getElementById('churchName').value||'').trim();
+  const email = (document.getElementById('contactEmail').value||'').trim();
+
+  // Always print full BOM — this is the internal working document
+  const allBOM = rA.concat(rB);
+
+  let quoteHtml = '';
+  if (dZip.length === 5) {
+    const oDig=279, dDig=parseInt(dZip.substring(0,3)), diff=Math.abs(oDig-dDig);
+    let zone, palletRate;
+    if(diff<50){zone=1;palletRate=350;}else if(diff<150){zone=2;palletRate=500;}else if(diff<300){zone=3;palletRate=650;}else{zone=4;palletRate=850;}
+    const spkVol=spk.mainsQty*3+(spk.subQty||0)*5+(spk.fillsQty||0)*2+1;
+    const pallets=Math.max(1,Math.ceil(spkVol/48));
+    const shipping=pallets*palletRate+(isPhys?palletRate:0);
+    const inp=calcInputs(); let baseHrs, cableFee;
+    if(inp<=12){baseHrs=6;cableFee=150;}else if(inp<=24){baseHrs=9;cableFee=250;}else{baseHrs=12;cableFee=350;}
+    const labor=(baseHrs+2)*LABOR_RATE+cableFee;
+    const eq=Math.round(bomTotal*1.20), total=eq+labor+shipping;
+
+    const bullets = [
+      'Equipment procurement &amp; testing',
+      'Rack build &amp; assembly',
+      'Cable labeling, sorting &amp; organization',
+      'Console programming, scene setup &amp; routing',
+      'System testing before shipment',
+      'Freight shipping to '+dZip+' (Zone '+zone+')',
+    ];
+
+    quoteHtml = '<div class="ps"><div class="pl">Project quote'
+      +(name?' — '+name+(church?', '+church:''):'')+' '+(email?'('+email+')':'')+' · '+dZip+'</div>'
+      +'<div class="quote-block">'
+      +'<ul style="margin:0 0 12px 1.1rem;padding:0;display:flex;flex-direction:column;gap:4px;">'
+      + bullets.map(function(b){return '<li style="font-size:13px;color:#555;line-height:1.5;">'+b+'</li>';}).join('')
+      +'</ul>'
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:10px;border-top:1px solid #ddd;">'
+      +'<span style="font-size:13px;color:#555;">Total project investment</span>'
+      +'<span style="font-size:20px;font-weight:700;color:#111;">$'+total.toLocaleString()+'<span style="font-size:12px;color:#999;">*</span></span>'
+      +'</div>'
+      +'<p style="font-size:10px;color:#999;margin-top:6px;line-height:1.6;">* Price may vary based on final equipment availability, freight carrier rates at time of shipment, and any site-specific requirements identified during installation planning.</p>'
+      +'</div></div>';
+  }
+
+  const bomHtml = '<div class="ps"><div class="pl">Equipment list</div>'+bomRows(allBOM)+'</div>';
+  const stagePlotHtml = SP.canvas
+    ? '<div class="ps"><div class="pl">Stage plot</div><img src="'+SP.canvas.toDataURL('image/png')+'" style="width:100%;border-radius:8px;"/></div>'
+    : '';
+
+  const rkHtml = isPhys
+    ? '<div class="ps"><div class="pl">Rack layouts</div><div class="dual-rack">'+rackHTML(rA,ruA,cRU_A,'Stage rack',false)+rackHTML(rB,ruB,cRU_B,'FOH rack',false)+'</div></div>'
+    : '<div class="ps"><div class="pl">Rack layout</div>'+rackHTML(rA,ruA,cRU_A,'Rack layout',false)+'</div>';
+
+  document.getElementById('printView').innerHTML =
+    '<div class="pe">Mobile Church AVL</div><h1>System Design</h1>'
+    +'<div class="ps"><div class="pl">Recommendation</div>'
+    +'<div class="prec">We\'d recommend the <strong>'+con.short+'</strong> — handles your '+inputs+' inputs and '+outputs+' outputs. Paired with <strong>'+spkDesc+'</strong>'+(needsFills?' and delay fills':'')+' for your space.</div>'
+    +'<div class="pm-grid">'
+    +'<div class="pm"><div class="pml">Inputs</div><div class="pmv">'+inputs+'</div><div class="pms">channels</div></div>'
+    +'<div class="pm"><div class="pml">Outputs</div><div class="pmv">'+outputs+'</div><div class="pms">'+monBuses+' mon + '+mainOuts+' main</div></div>'
+    +'<div class="pm"><div class="pml">Rack'+(isPhys?' A':'')+' used</div><div class="pmv">'+ruA+'U</div><div class="pms">of '+cRU_A+'U</div></div>'
+    +(isPhys?'<div class="pm"><div class="pml">FOH rack used</div><div class="pmv">'+ruB+'U</div><div class="pms">of '+cRU_B+'U</div></div>':'')
+    +'</div></div>'
+    + rkHtml + bomHtml + stagePlotHtml + quoteHtml
+    + '<div class="pfooter">Generated '+new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})+' · Mobile Church AVL System Designer</div>';
+}
+
+// ── STEP NAV ──────────────────────────────────────────────
+const STEP_LABELS = ['01 — Room','02 — Inputs','03 — Outputs','04 — System','05 — Quote'];
+let currentStep = 1;
+function goStep(n) {
+  if (n === 4 || n === 5) renderResults();
+  document.getElementById('s'+currentStep).classList.remove('active');
+  currentStep = n;
+  document.getElementById('s'+n).classList.add('active');
+  const pt=document.getElementById('progTrack'),sl=document.getElementById('stepLabel'),sc=document.getElementById('stepCount');
+  pt.innerHTML='';
+  for(let i=1;i<=5;i++){const d=document.createElement('div');d.className='prog-step'+(i<n?' done':i===n?' active':'');pt.appendChild(d);}
+  if(sl)sl.textContent=STEP_LABELS[n-1];
+  if(sc)sc.textContent='Step '+n+' of 5';
+  if (n === 5) setTimeout(calcQuote, 50);
+  // Scroll to top — works standalone and inside iframes (Wix)
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  window.scrollTo({top:0,behavior:'smooth'});
+  try { window.parent.scrollTo({top:0,behavior:'smooth'}); } catch(e){}
+}
+
+calcAll();
+
+// ── STATE PERSISTENCE FOR STRIPE REDIRECT ────────────────
+function saveStateToStorage() {
+  try {
+    const saved = {
+      S: S,
+      contactName: document.getElementById('contactName').value,
+      churchName: document.getElementById('churchName').value,
+      contactEmail: document.getElementById('contactEmail').value,
+      destZip: document.getElementById('destZip').value,
+      roomLength: document.getElementById('roomLength').value,
+      roomWidth: document.getElementById('roomWidth').value,
+      roomHeight: document.getElementById('roomHeight').value,
+      stageDepth: document.getElementById('stageDepth').value,
+      stageWidth: document.getElementById('stageWidth').value,
+    };
+    localStorage.setItem('avl_design_state', JSON.stringify(saved));
+  } catch(e) {}
+}
+
+function restoreStateFromStorage() {
+  try {
+    const raw = localStorage.getItem('avl_design_state');
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    Object.assign(S, saved.S);
+    const setVal = function(id, val) { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    setVal('contactName', saved.contactName);
+    setVal('churchName', saved.churchName);
+    setVal('contactEmail', saved.contactEmail);
+    setVal('destZip', saved.destZip);
+    setVal('roomLength', saved.roomLength);
+    setVal('roomWidth', saved.roomWidth);
+    setVal('roomHeight', saved.roomHeight);
+    setVal('stageDepth', saved.stageDepth);
+    setVal('stageWidth', saved.stageWidth);
+    function markChip(groupId, val) {
+      const grp = document.getElementById(groupId); if (!grp || !val) return;
+      grp.querySelectorAll('.chip').forEach(function(c) { c.classList.toggle('on', c.dataset.val === val); });
+    }
+    markChip('venueType', S.venueType);
+    markChip('stageIncluded', S.stageIncluded);
+    markChip('attendance', S.attendance);
+    markChip('consoleMode', S.consoleMode);
+    markChip('iPadTracks', S.iPadTracks);
+    markChip('tracksAtAll', S.tracksAtAll);
+    markChip('drumKit', S.drumKit);
+    markChip('wedgeMixMode', S.wedgeMixMode);
+    updateSqft(); calcAll();
+    return true;
+  } catch(e) { return false; }
+}
+
+// Save state when purchase button is clicked (before Stripe tab opens)
+// This must run BEFORE the main click handler opens Stripe, so we use capture phase
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('#btnBuyPlans');
+  if (btn) saveStateToStorage();
+}, true); // capture=true fires before bubble phase
+
+// On load — if returning from Stripe with ?purchased=true, restore and show unlocked design
+document.addEventListener('DOMContentLoaded', function() {
+  if (!UNLOCKED) return;
+  const restored = restoreStateFromStorage();
+  if (restored) {
+    // Small delay to let renderResults finish
+    setTimeout(function() {
+      goStep(4);
+      setTimeout(function() {
+        const rc = document.getElementById('resultsContent');
+        if (rc) {
+          const banner = document.createElement('div');
+          banner.className = 'inline-note accent';
+          banner.style.cssText = 'margin-bottom:1rem;font-size:13px;padding:12px 16px;';
+          banner.innerHTML = '<strong>Purchase confirmed!</strong> Your full system design is unlocked below. Use the Save / Print PDF button to download your plans.';
+          rc.insertBefore(banner, rc.firstChild);
+        }
+      }, 300);
+    }, 100);
+  }
+});
+
+// Redraw stage plot on resize (phone rotation, window resize)
+window.addEventListener('resize', function() {
+  if (SP.canvas && document.getElementById('stagePlotEditor')) {
+    spGetDimensions();
+    SP.canvas.width = SP.W;
+    SP.canvas.height = SP.H;
+    spDraw();
+  }
+});
+</script>
+</body>
+</html>
